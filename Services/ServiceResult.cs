@@ -24,4 +24,9 @@ public class ServiceResult<T>
     {
         return new ServiceResult<T> { ErrorMessage = [errorMessage] , Status = status  };
     }
+
+    public ServiceResult<T> NotFound(string errorMessage, HttpStatusCode status = HttpStatusCode.NotFound)
+    {
+        return new ServiceResult<T> { ErrorMessage = [errorMessage], Status = status };
+    }
 }

@@ -3,7 +3,6 @@ using Entities.DTOs.Appointment;
 using Entities.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Services.AppServices.AppointmentServices;
 using Services.AppServices.ServiceServices;
 using System.Security.Claims;
@@ -27,47 +26,19 @@ namespace OnlineAppointmentPanel.Controllers
         [Authorize(Roles = nameof(UserRoles.Admin) + "," + nameof(UserRoles.Customer))]
         public async Task<IActionResult> Index()
         {
-            ViewBag.IsCustomer = User.IsInRole(nameof(UserRoles.Customer));
-            ViewBag.IsAdmin = User.IsInRole(nameof(UserRoles.Admin));
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var result = await _appointmentService.GetAppointmentsForUserAsync();
 
-            // Eğer kullanıcı Customer ise yalnızca kendi randevularını görsün
-            if (User.IsInRole(nameof(UserRoles.Customer)))
+            if (!result.IsSuccess)
             {
-                if (userIdClaim == null)
-                {
-                    ViewBag.ErrorMessage = "Kullanıcı kimliği bulunamadı.";
-                    return View();
-                }
-
-                var userId = Guid.Parse(userIdClaim);
-                var customerResult = await _appointmentService.Where(_user => _user.UserId == userId && _user.IsDelete == false);
-                if (customerResult.IsSuccess)
-                {
-                    return View(customerResult.Data);
-                }
-
-                ViewBag.ErrorMessage = string.Join(",", customerResult.ErrorMessage);
+                ViewBag.ErrorMessage = string.Join(",", result.ErrorMessage);
                 return View();
             }
 
-            // Eğer kullanıcı Admin ise tüm randevuları görsün
-            if (User.IsInRole(nameof(UserRoles.Admin)))
-            {
-                var adminResult = await _appointmentService.GetAll();
-                if (adminResult.IsSuccess)
-                {
-                    return View(adminResult.Data);
-                }
-
-                ViewBag.ErrorMessage = string.Join(",", adminResult.ErrorMessage);
-                return View();
-            }
-
-            // Eğer herhangi bir rol eşleşmezse hata mesajı döner
-            ViewBag.ErrorMessage = "Randevular görüntülenemedi.";
-            return View();
+            ViewBag.IsCustomer = result.Data.IsCustomer;
+            ViewBag.IsAdmin = result.Data.IsAdmin;
+            return View(result.Data);
         }
+
 
         [HttpGet]
         [Route("Appointments/GetById/{id}")]
@@ -83,7 +54,6 @@ namespace OnlineAppointmentPanel.Controllers
                     data = result.Data
                 });
             }
-            ViewBag.ErrorMessage = string.Join(",", result.ErrorMessage);
 
             return Json(new
             {
@@ -101,10 +71,9 @@ namespace OnlineAppointmentPanel.Controllers
 
             if (result.IsSuccess && result.Data != null)
             {
-                return View(result.Data); // DTO'yu View'e gönderiyoruz
+                return View(result.Data);
             }
 
-            // Eğer hata varsa, hata mesajı ile birlikte hata View'ini döndür
             ViewBag.ErrorMessage = string.Join(",", result.ErrorMessage);
             return View("Error");
         }
@@ -142,7 +111,6 @@ namespace OnlineAppointmentPanel.Controllers
 
             return Json(new { success = true, statuses });
         }
-
 
         [Authorize(Roles = nameof(UserRoles.Customer))]
         [HttpPost]
@@ -185,54 +153,7 @@ namespace OnlineAppointmentPanel.Controllers
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
 
-
         [Authorize(Roles = nameof(UserRoles.Customer))]
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-
-            var result = await _serviceService.Where(_service => _service.IsDelete == false);
-
-            if (!result.IsSuccess || result.Data == null)
-            {
-                ViewBag.ErrorMessage = "Servisler yüklenemedi.";
-                return View("Error");
-            }
-
-            ViewBag.Services = new SelectList(result.Data, "Id", "Name");
-
-            return View();
-        }
-
-        [Authorize(Roles = nameof(UserRoles.Admin) + "," + nameof(UserRoles.Customer))]
-        [HttpGet]
-        public async Task<IActionResult> Update(Guid id)
-        {
-            var result = await _appointmentService.GetByIdAsync(id);
-
-            if (!result.IsSuccess || result.Data == null)
-            {
-                ViewBag.ErrorMessage = string.Join(",", result.ErrorMessage);
-                return View("Error");
-            }
-
-            var servicesResult = await _serviceService.GetAll();
-            if (!servicesResult.IsSuccess || servicesResult.Data == null)
-            {
-                ViewBag.ErrorMessage = "Servisler yüklenemedi.";
-                return View("Error");
-            }
-
-            ViewBag.Services = new SelectList(servicesResult.Data, "Id", "Name");
-
-            // Kullanıcının Admin olup olmadığını belirle
-            ViewBag.IsAdmin = User.IsInRole(nameof(UserRoles.Admin));
-
-            var updateRequest = _mapper.Map<UpdateAppointmentRequest>(result.Data);
-            return View(updateRequest);
-        }
-
-        [Authorize(Roles = nameof(UserRoles.Admin) + "," + nameof(UserRoles.Customer))]
         [HttpPost]
         public async Task<JsonResult> Update(UpdateAppointmentRequest request)
         {
@@ -245,7 +166,7 @@ namespace OnlineAppointmentPanel.Controllers
             var originalData = await _appointmentService.GetByIdAsync(request.Id);
             if (!originalData.IsSuccess || originalData.Data == null)
             {
-                return Json(new { success = false, errorMessage = "Orijinal randevu bulunamadı." });
+                return Json(new { success = false, errorMessage = "Randevu bulunamadı." });
             }
 
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -255,20 +176,13 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new { success = false, errorMessage = "Bu randevuyu güncelleme yetkiniz yok." });
             }
 
-            if (User.IsInRole(nameof(UserRoles.Customer)))
-            {
-                if (!Enum.TryParse(originalData.Data.Status, out AppointmentStatus status) || status != AppointmentStatus.Pending)
-                {
-                    return Json(new { success = false, errorMessage = "Sadece beklemede durumundaki randevularınızı güncelleyebilirsiniz." });
-                }
-                request.Status = AppointmentStatus.Pending;
-            }
 
-            if (User.IsInRole(nameof(UserRoles.Admin)))
+            if (originalData.Data.Status != AppointmentStatus.Pending)
             {
-                request.ServiceId = originalData.Data.ServiceId;
-                request.AppointmentDate = originalData.Data.AppointmentDate;
+                return Json(new { success = false, errorMessage = "Sadece beklemede durumundaki randevularınızı güncelleyebilirsiniz." });
             }
+            request.Status = AppointmentStatus.Pending;
+
 
             var result = await _appointmentService.UpdateAsync(request);
             if (result.IsSuccess)
@@ -294,6 +208,7 @@ namespace OnlineAppointmentPanel.Controllers
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
 
+        [Authorize(Roles = nameof(UserRoles.Admin))]
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(UpdateAppointmentStatusRequest request)
         {
@@ -321,24 +236,11 @@ namespace OnlineAppointmentPanel.Controllers
             return Json(new { success = false, errorMessage = result.ErrorMessage });
         }
 
-
         [HttpPost]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var originalData = await _appointmentService.GetByIdAsync(id);
-            if (!originalData.IsSuccess || originalData.Data == null)
-            {
-                return Json(new { success = false, errorMessage = "Orijinal randevu bulunamadı." });
-            }
-
-            // Kullanıcının sadece kendi randevusunu güncelleyebilmesi için kontrol
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (User.IsInRole(nameof(UserRoles.Customer)) && (userIdClaim == null || originalData.Data.UserId.ToString() != userIdClaim))
-            {
-                return Json(new { success = false, errorMessage = "Sadeve kendi randevularınızı silebilirsiniz." });
-            }
-
             var result = await _appointmentService.SoftDeleteAsync(id);
+
             if (result.IsSuccess)
             {
                 return Json(new { success = true, message = "Randevu başarıyla silindi.", id = id });

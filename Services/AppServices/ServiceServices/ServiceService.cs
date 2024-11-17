@@ -6,6 +6,7 @@ using Repositories.RepositoriesDal.ServiceDal;
 using Repositories.UnitOfWorks;
 using Services.BusinessRules;
 using System.Linq.Expressions;
+using System.Net;
 
 namespace Services.AppServices.ServiceServices
 {
@@ -39,12 +40,9 @@ namespace Services.AppServices.ServiceServices
         public async Task<ServiceResult<bool>> DeleteAsync(Guid id)
         {
             var service = await _serviceRepository.GetByIdAsync(id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(service, nameof(Service));
-
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
+            
+            if (service == null) 
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
 
             _serviceRepository.Delete(service);
             await _unitOfWork.SaveChangesAsync();
@@ -71,12 +69,8 @@ namespace Services.AppServices.ServiceServices
         public async Task<ServiceResult<bool>> SoftDeleteAsync(Guid id)
         {
             var service = await _serviceRepository.GetByIdAsync(id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(service, nameof(Service));
-
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
+            if (service == null)
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
 
             service.IsDelete = true;
             service.DeletedDate = DateTime.UtcNow;
@@ -89,15 +83,10 @@ namespace Services.AppServices.ServiceServices
         public async Task<ServiceResult<bool>> UpdateAsync(UpdateServiceRequest request)
         {
             var service = await _serviceRepository.GetByIdAsync(request.Id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(service, nameof(Service));
+            if (service == null)
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
 
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
-
-            service.Name = request.Name;
-            // Diğer alanlar varsa burada güncellenir
+            service.Name = request.Name;          
             _serviceRepository.Update(service);
             await _unitOfWork.SaveChangesAsync();
 

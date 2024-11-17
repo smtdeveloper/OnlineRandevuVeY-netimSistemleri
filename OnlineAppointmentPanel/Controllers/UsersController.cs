@@ -20,8 +20,7 @@ namespace OnlineAppointmentPanel.Controllers
         }
 
         [Authorize(Roles = nameof(UserRoles.Admin))]
-        public async Task<IActionResult> Index()
-        
+        public async Task<IActionResult> Index()      
         {
             var result = await _userService.GetAll();
             if (result.IsSuccess)

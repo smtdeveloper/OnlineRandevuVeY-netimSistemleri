@@ -85,7 +85,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     $.ajax({
-                        url: `/Users/Delete/${userId}`, // Route'daki {id} yerine userId'yi yerleştiriyoruz
+                        url: `/Users/Delete/${userId}`,
                         type: 'Delete',
                         success: function (response) {
                             if (response.success) {
@@ -95,8 +95,8 @@
                                     text: response.message,
                                     confirmButtonText: 'Tamam'
                                 }).then(() => {
-                                    $(`#user-row-${userId}`).remove(); // DOM'dan kullanıcı satırını kaldır
-                                    $('#userTable').DataTable().row(`#user-row-${userId}`).remove().draw(); // DataTable'dan güncelle
+                                    $(`#user-row-${userId}`).remove(); 
+                                    $('#userTable').DataTable().row(`#user-row-${userId}`).remove().draw();
                                 });
                             } else {
                                 Swal.fire({
