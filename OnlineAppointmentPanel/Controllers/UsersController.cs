@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using Entities.DTOs.Auth;
+﻿using Entities.DTOs.Auth;
 using Entities.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.AppServices.UserServices;
+using Services.Constansts;
 
 namespace OnlineAppointmentPanel.Controllers
 {
@@ -74,7 +74,7 @@ namespace OnlineAppointmentPanel.Controllers
             var result = await _userService.SoftDeleteAsync(id);
             if (result.IsSuccess)
             {
-                return Json(new { success = true, message = "Kullanıcı başarıyla silindi." });
+                return Json(new { success = true, message = Messages.UserDeletedSuccessfully });
             }
             return Json(new { success = false, errorMessage = result.ErrorMessage });
         }
@@ -148,20 +148,20 @@ namespace OnlineAppointmentPanel.Controllers
             var userResult = await _userService.GetByIdAsync(request.UserId);
             if (!userResult.IsSuccess || userResult.Data == null)
             {
-                ModelState.AddModelError(string.Empty, "Kullanıcı bilgisi alınamadı.");
+                ModelState.AddModelError(string.Empty, Messages.UserInformationNotRetrieved);
                 return View(request);
             }
 
             if (userResult.Data.Roles.Contains(request.SelectedRole))
             {
-                TempData["ErrorMessage"] = "Bu rol zaten atanmış durumda.";
+                TempData["ErrorMessage"] = Messages.RoleAlreadyAssigned;
                 return RedirectToAction("AssignRole", new { id = request.UserId });
             }
 
             var result = await _userService.AssignRoleAsync(request.UserId, request.SelectedRole);
             if (result.IsSuccess)
             {
-                TempData["SuccessMessage"] = "Rol başarıyla atandı.";
+                TempData["SuccessMessage"] = Messages.RoleAssignedSuccessfully;
                 return RedirectToAction("Index");
             }
 
@@ -176,15 +176,13 @@ namespace OnlineAppointmentPanel.Controllers
             var removeRoleResult = await _userService.RemoveRoleAsync(userId, role);
             if (removeRoleResult.IsSuccess)
             {
-                TempData["SuccessMessage"] = "Rol başarıyla geri çekildi.";
+                TempData["SuccessMessage"] = Messages.RoleRemovedSuccessfully;
             }
             else
             {
                 TempData["ErrorMessage"] = removeRoleResult.ErrorMessage;
             }
-
             return RedirectToAction("AssignRole", new { id = userId });
         }
-
     }
 }

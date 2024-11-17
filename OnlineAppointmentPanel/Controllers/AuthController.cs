@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.AppServices.UserServices;
+using Services.Constansts;
 using System.Security.Claims;
 
 namespace OnlineAppointmentPanel.Controllers
@@ -31,7 +32,7 @@ namespace OnlineAppointmentPanel.Controllers
             var user = await _userService.AuthenticateUserAsync(loginRequest.UserName, loginRequest.Password);
             if (user == null)
             {
-                TempData["ErrorMessage"] = "Geçersiz kullanıcı adı veya şifre.";
+                TempData["ErrorMessage"] = Messages.InvalidUsernameOrPassword;
                 return View();
             }
 
@@ -55,7 +56,7 @@ namespace OnlineAppointmentPanel.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
-            TempData["SuccessMessage"] = "Başarıyla giriş yapıldı!";
+            TempData["SuccessMessage"] = Messages.LoginSuccessful;
             return RedirectToAction("Index", "Home");
         }
 
@@ -63,7 +64,7 @@ namespace OnlineAppointmentPanel.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            TempData["SuccessMessage"] = "Başarıyla çıkış yapıldı!";
+            TempData["SuccessMessage"] = Messages.LogoutSuccessful;
             return RedirectToAction("Login", "Auth");
         }
     }
