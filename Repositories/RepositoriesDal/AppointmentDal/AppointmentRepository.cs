@@ -21,8 +21,4 @@ public class AppointmentRepository : GenericRepository<Appointment>, IAppointmen
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 
-    public async Task<Service?> GetServiceByIdAsync(Guid serviceId)
-    {
-        return await _context.Services.FirstOrDefaultAsync(s => s.Id == serviceId); // Service sorgusu
-    }
 }

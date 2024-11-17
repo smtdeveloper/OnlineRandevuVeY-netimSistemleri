@@ -5,6 +5,5 @@ namespace Repositories.RepositoriesDal.AppointmentDal;
 
 public interface IAppointmentRepository : IGenericRepository<Appointment>
 {
-    new Task<Appointment?> GetByAppointmentIdAsync(Guid id); 
-    Task<Service?> GetServiceByIdAsync(Guid serviceId); 
+    new Task<Appointment?> GetByAppointmentIdAsync(Guid id);    
 }

@@ -78,7 +78,7 @@ public class AppointmentService : IAppointmentService
         await _unitOfWork.SaveChangesAsync();
 
         // Güncellenen Service bilgisi için Repository üzerinden sorgu
-        var updatedService = await _appointmentRepository.GetServiceByIdAsync(request.ServiceId);
+        var updatedService = await _serviceRepository.GetByIdAsync(request.ServiceId);
         if (updatedService == null)
         {
             return new ServiceResult<UpdateAppointmentResponse>().Fail("Hizmet bilgisi bulunamadı.");
