@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Anasayfa";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-12 text-center mb-4">
+            <h1 class="display-5 fw-bold">Online Randevu ve Yönetim Sistemi</h1>
+            <p class="lead text-muted">Dinçer Şirketi için özel olarak tasarlanmış, profesyonel ve kolay kullanımlı bir yönetim sistemi</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Feature Cards -->
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-3 text-primary"></i>
+                    <h5 class="card-title mt-3">Kolay Randevu Yönetimi</h5>
+                    <p class="card-text">Randevularınızı hızlı bir şekilde oluşturun, yönetin ve kontrol edin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-circle display-3 text-success"></i>
+                    <h5 class="card-title mt-3">Kullanıcı Dostu Arayüz</h5>
+                    <p class="card-text">Kullanıcılar ve müşteriler için kolay ve sezgisel bir deneyim sunar.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-bar-chart display-3 text-warning"></i>
+                    <h5 class="card-title mt-3">Raporlama ve Analiz</h5>
+                    <p class="card-text">Gelişmiş raporlama özellikleri ile işletmenizi büyütün.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row text-center">
+        <!-- Call to Action Section -->
+        <div class="col-lg-12">
+            <h2 class="mb-4">Neden Dinçer Online Randevu Sistemi?</h2>
+            <p class="lead text-muted">
+                Dinçer Şirketi olarak, müşterilerimizin ihtiyaçlarını en iyi şekilde karşılamak için tasarlanmış bu sistemle
+                hızlı, güvenilir ve esnek bir randevu yönetimi sunuyoruz.
+            </p>
+            <a href="@Url.Action("Index", "Appointments")" class="btn btn-primary btn-lg mt-3">
+                Şimdi Randevu Yönetimine Başlayın
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Image Section -->
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h3 class="fw-bold">Randevularınızı Kolayca Yönetin</h3>
+            <p class="text-muted">
+                Sistemimiz, işletmenizin ihtiyaçlarını karşılamak için özel olarak tasarlanmıştır. Kullanıcı dostu arayüzü sayesinde
+                işlemlerinizi hızlı ve kolay bir şekilde gerçekleştirebilirsiniz.
+            </p>
+        </div>
+        <div class="col-md-6">
+            <img src="https://via.placeholder.com/600x400" alt="Randevu Yönetimi" class="img-fluid rounded shadow-sm">
+        </div>
+    </div>
+</div>

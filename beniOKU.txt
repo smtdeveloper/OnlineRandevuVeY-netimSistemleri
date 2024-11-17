@@ -1,0 +1,125 @@
+=========================================
+ONLINE RANDEVU VE YÖNETİM SİSTEMİ
+=========================================
+
+Proje Kapsamında:
+-----------------
+1. **Id Alanları:**
+   - Tüm tabloların Id alanları **GUID** olarak tasarlanmış ve **SequentialGuidValueGenerator** kullanılarak sıralı GUID değerleri oluşturulmuştur.
+   - Bu, hem performansı artırmak hem de veritabanı düzenini optimize etmek amacıyla tercih edilmiştir.
+
+2. **Veritabanı:**
+   - **MSSQL uzak sunucusu** kullanılarak yapılandırılmıştır.
+   - Uygulamanın farklı cihazlardan ve ortamlardan erişilebilir olması sağlanmıştır.
+
+3. **Panel Yapısı:**
+   - Admin ve kullanıcı panelleri genelde ayrı ayrı tasarlanabilir.
+   - Ancak, bu projede **rol bazlı kontrollerin** daha etkili uygulanabilmesi için **tek bir panel** kullanılmıştır.
+   - Kullanıcılar ve yöneticiler, rollerine göre yalnızca ilgili sayfalara erişebilir.
+   - Bu yaklaşım, kodun sürdürülebilirliğini artırmış ve geliştirme sürecini hızlandırmıştır.
+
+-----------------------------------------
+VERİTABANI YAPISI
+-----------------------------------------
+
+1. **BaseEntity:**
+   - Tüm entity’ler için ortak özellikler içerir.
+   - Özellikler:
+     - `Id`: Her bir kayıt için benzersiz GUID.
+     - `CreatedDate`: Oluşturulma tarihi.
+     - `UpdatedDate`: Güncellenme tarihi.
+     - `DeletedDate`: Silinme tarihi (Soft Delete için).
+
+2. **Appointment:**
+   - Kullanıcıların aldığı randevuları temsil eder.
+   - Özellikler:
+     - `UserId`: Randevuyu alan kullanıcının ID'si.
+     - `ServiceId`: Randevu alınan hizmetin ID'si.
+     - `AppointmentDate`: Randevu tarihi.
+     - `Status`: Randevunun durumu (Onaylandı, İptal Edildi, Tamamlandı vb.).
+     - `IsDelete`: Silinme durumu (Soft Delete).
+   - İlişkiler:
+     - `User`: Randevu sahibi kullanıcı.
+     - `Service`: Randevunun ait olduğu hizmet.
+
+3. **Service:**
+   - Randevu alınabilen hizmetleri temsil eder.
+   - Özellikler:
+     - `Name`: Hizmetin adı (Egzoz Gazı Ölçümü, Fren Testi, Far Ayarı vb.).
+     - `IsDelete`: Silinme durumu.
+   - İlişkiler:
+     - `Appointments`: Hizmete bağlı tüm randevular.
+
+4. **User:**
+   - Sistemi kullanan kullanıcıları temsil eder.
+   - Özellikler:
+     - `UserName`: Kullanıcı adı.
+     - `PasswordHash`: Şifre hashlenmiş olarak saklanır.
+     - `IsDelete`: Silinme durumu.
+   - İlişkiler:
+     - `Roles`: Kullanıcının sistemdeki rolleri.
+     - `Appointments`: Kullanıcının aldığı randevular.
+
+5. **UserRole:**
+   - Kullanıcıların rollerini temsil eder.
+   - Özellikler:
+     - `UserId`: Rol atanmış kullanıcının ID'si.
+     - `Role`: Kullanıcının rolü (User, Admin vb.).
+     - `IsDelete`: Silinme durumu.
+   - İlişkiler:
+     - `User`: Rolün ait olduğu kullanıcı.
+
+-----------------------------------------
+PROJENİN ÖZELLİKLERİ
+-----------------------------------------
+
+1. **Giriş Sayfası:**
+   - Kullanıcılar sisteme kullanıcı adı ve şifre ile giriş yapabilir.
+   - Kullanıcı rolleri (User/Admin) doğrultusunda yetkilendirme yapılır.
+
+2. **Kullanıcı Paneli:**
+   - **Randevu Alımı:** Kullanıcılar hizmet türü ve tarih seçerek randevu alabilir.
+   - **Randevu Yönetimi:**
+     - Randevular eklenebilir, güncellenebilir ve silinebilir.
+     - İşlemler AJAX kullanılarak, sayfa yenilenmeden gerçekleştirilir.
+   - **Hizmet Türleri:**
+     - Egzoz Gazı Ölçümü
+     - Fren Testi
+     - Far Ayarı
+   - Kullanıcı randevularını listeleyebilir ve durumlarını görüntüleyebilir.
+
+3. **Admin Paneli:**
+   - **Kullanıcı Yönetimi:**
+     - Kullanıcı ekleme, silme, güncelleme ve rol atama işlemleri yapılabilir.
+   - **Randevu Yönetimi:**
+     - Sistem genelindeki tüm randevular görüntülenir.
+     - Randevu durumları (Onaylandı, İptal Edildi, Tamamlandı) güncellenebilir.
+
+-----------------------------------------
+TEKNİK DETAYLAR
+-----------------------------------------
+
+1. **Kimlik Doğrulama ve Yetkilendirme:**
+   - Kullanıcıların şifreleri hashlenerek saklanır.
+   - Roller doğrultusunda erişim kısıtlamaları uygulanır.
+
+2. **Kullanılan Teknolojiler:**
+   - ASP.NET Core MVC
+   - MSSQL Veritabanı
+   - Entity Framework Core
+   - AJAX ve jQuery ile sayfa yenilenmeden CRUD işlemleri
+   - Toastr veya SweetAlert ile kullanıcı bildirimleri
+
+
+-----------------------------------------
+PROJE ÇIKTILARI
+-----------------------------------------
+
+- **Dinamik Kullanıcı Deneyimi:** Kullanıcıların randevuları hızlı bir şekilde yönetmesi sağlandı.
+- **AJAX ile Performans:** CRUD işlemleri sayfa yenilenmeden gerçekleştirildi.
+- **Admin Kontrolü:** Sistem genelindeki kullanıcılar ve randevular kolayca yönetilebilir hale getirildi.
+
+
+-----------------------------------------
+SAMET AKCA – Yazılım Geliştirici
+-----------------------------------------

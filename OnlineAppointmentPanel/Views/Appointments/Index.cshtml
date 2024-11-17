@@ -1,0 +1,474 @@
+﻿@model IEnumerable<Entities.DTOs.Appointment.AppointmentDto>
+
+@{
+    ViewData["Title"] = "Randevu Listesi";
+}
+
+<h1 class="text-center my-4">Randevu Listesi</h1>
+
+<div class="card">
+    <div class="card-body">
+        @if (ViewBag.IsCustomer)
+        {
+            <div class="d-flex justify-content-end mb-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
+                    Yeni Randevu Al
+                </button>
+            </div>
+        }
+
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    @if (ViewBag.IsAdmin)
+                    {
+                        <th>Kullanıcı Adı</th>
+                    }
+                    <th>Hizmet Adı</th>
+                    <th>Randevu Tarihi</th>
+                    <th>Durum</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentList">
+                @foreach (var appointment in Model)
+                {
+                    <tr id="appointment-row-@appointment.Id">
+                        @if (ViewBag.IsAdmin)
+                        {
+                            <td>@appointment.UserName</td>
+                        }
+                        <td>@appointment.ServiceName</td>
+                        <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="status-cell" data-status="@appointment.Status"></td>
+                        <td>
+                            <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
+                            @if (ViewBag.IsCustomer)
+                            {
+                                <a href="javascript:void(0)" onclick="openUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Güncelle</a>
+                            }
+                            @if (ViewBag.IsAdmin)
+                            {
+                                <a href="javascript:void(0)" onclick="openStatusUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Durum Güncelle</a>
+                            }
+                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('@appointment.Id')">Sil</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- Add Appointment Modal -->
+<div class="modal fade" id="addAppointmentModal" tabindex="-1" aria-labelledby="addAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAppointmentModalLabel">Yeni Randevu Ekle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <div class="mb-3">
+                        <label for="serviceId" class="form-label">Hizmet Seçin</label>
+                        <select id="serviceId" name="ServiceId" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointmentDate" class="form-label">Randevu Tarihi</label>
+                        <input type="datetime-local" id="appointmentDate" name="AppointmentDate" class="form-control" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" id="createAppointmentBtn" class="btn btn-primary">Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Appointment Modal -->
+<div class="modal fade" id="updateAppointmentModal" tabindex="-1" aria-labelledby="updateAppointmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateAppointmentModalLabel">Randevu Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateAppointmentForm">
+                    <input type="hidden" id="updateAppointmentId" name="Id" />
+                    <div class="mb-3">
+                        <label for="updateServiceId" class="form-label">Hizmet Seçin</label>
+                        <select id="updateServiceId" name="ServiceId" class="form-select" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="updateAppointmentDate" class="form-label">Randevu Tarihi</label>
+                        <input type="datetime-local" id="updateAppointmentDate" name="AppointmentDate" class="form-control" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" id="updateAppointmentBtn" class="btn btn-primary">Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusUpdateModalLabel">Durum Güncelle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <input type="hidden" id="statusUpdateAppointmentId" name="Id" />
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label">Durum Seçin</label>
+                        <select id="statusSelect" name="Status" class="form-select" required>
+                            <option value="">Durum Seçin</option>
+                            <!-- Status options will be loaded dynamically -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button type="button" id="updateStatusBtn" class="btn btn-primary">Durumu Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+      $(document).ready(function () {
+        // Türkçe çeviri
+        const statusTranslations = {
+            "Pending": "Beklemede",
+            "Approved": "Onaylandı",
+            "Canceled": "İptal Edildi",
+            "Completed": "Tamamlandı"
+        };
+
+        // Durumları Türkçeye çevir ve DOM'a uygula
+        $(".status-cell").each(function () {
+            const status = $(this).data("status"); // Backend'den gelen durum
+            const translatedStatus = statusTranslations[status] || status; // Çeviri veya orijinal değer
+            $(this).text(translatedStatus); // Türkçeyi DOM'a yansıt
+        });
+
+        // Durumları yükle
+        function loadStatusOptions() {
+            $.ajax({
+                url: "/Appointments/GetStatuses", // Backend endpoint to fetch statuses
+                type: "GET",
+                success: function (response) {
+                    if (response.success) {
+                        const statusDropdown = $("#statusSelect");
+                        statusDropdown.empty();
+                        statusDropdown.append(new Option("Durum Seçin", ""));
+
+                        response.statuses
+                            .filter(status => status.name !== "Unknown") // Unknown'u gizle
+                            .forEach(status => {
+                                const translatedName = statusTranslations[status.name] || status.name;
+                                statusDropdown.append(new Option(translatedName, status.id));
+                            });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata", "Durum seçenekleri yüklenemedi.", "error");
+                }
+            });
+        }
+
+        // Durum güncelleme modalını aç
+        window.openStatusUpdateModal = function (id) {
+            $("#statusUpdateAppointmentId").val(id);
+            loadStatusOptions(); // Durumları modal açıldığında yükle
+            $("#statusUpdateModal").modal("show");
+        };
+
+        // Durum güncelleme işlemi
+        $("#updateStatusBtn").click(function () {
+            const data = {
+                Id: $("#statusUpdateAppointmentId").val(),
+                Status: $("#statusSelect").val()
+            };
+
+            if (!data.Status) {
+                Swal.fire("Hata", "Lütfen bir durum seçin.", "error");
+                return;
+            }
+
+            $.ajax({
+                url: "/Appointments/UpdateStatus", // Backend endpoint for updating status
+                type: "POST",
+                data: data,
+                beforeSend: function () {
+                    Swal.fire({
+                        title: "Güncelleniyor...",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                },
+                success: function (response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Başarılı",
+                            text: response.message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            // Güncellenen durumu DOM'da göster
+                            const translatedStatus = statusTranslations[response.appointment.status] || response.appointment.status;
+                            $(`#appointment-row-${response.appointment.id} .status-cell`).text(translatedStatus);
+
+                            // Modal'ı kapat
+                            $("#statusUpdateModal").modal("hide");
+                        });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata", "Durum güncellenemedi.", "error");
+                }
+            });
+        });
+    });
+
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        // Fetch services for the dropdown
+        function loadServices() {
+            $.ajax({
+                url: "/Appointments/GetServices",
+                type: "GET",
+                success: function (response) {
+                    if (response.success) {
+                        const serviceDropdown = $("#serviceId");
+                        serviceDropdown.empty();
+                        serviceDropdown.append(new Option("Lütfen bir hizmet seçin", ""));
+                        response.services.forEach(service => {
+                            serviceDropdown.append(new Option(service.name, service.id));
+                        });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata", "Hizmetler yüklenemedi.", "error");
+                }
+            });
+        }
+
+        // Load services when modal is opened
+        $("#addAppointmentModal").on("show.bs.modal", function () {
+            loadServices();
+        });
+
+        // Handle appointment creation
+        $("#createAppointmentBtn").click(function () {
+            const data = {
+                ServiceId: $("#serviceId").val(),
+                AppointmentDate: $("#appointmentDate").val()
+            };
+
+            if (!data.ServiceId || !data.AppointmentDate) {
+                Swal.fire("Hata", "Lütfen tüm alanları doldurunuz.", "error");
+                return;
+            }
+
+            $.ajax({
+                url: "/Appointments/Create",
+                type: "POST",
+                data: data,
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Başarılı",
+                            text: response.message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            const newRow = `
+                                <tr id="appointment-row-${response.appointment.id}">
+                                    
+                                    <td>${response.appointment.serviceName || "Bilinmiyor"}</td>
+                                    <td>${response.appointment.appointmentDate || "Tarih yok"}</td>
+                                    <td>${response.appointment.status || "Durum yok"}</td>
+                                    <td>
+                                        <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
+                                        <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('${response.appointment.id}')">Sil</button>
+                                    </td>
+                                </tr>`;
+
+                            $("#appointmentList").append(newRow);
+
+                            $("#addAppointmentModal").modal("hide");
+                            $("#appointmentForm")[0].reset();
+                        });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire("Hata", "Randevu oluşturulamadı.", "error");
+                }
+            });
+        });
+
+        // Open update modal and fetch data
+        window.openUpdateModal = function (id) {
+            $("#updateAppointmentId").val("");
+            $("#updateServiceId").empty();
+            $("#updateAppointmentDate").val("");
+
+            $.ajax({
+                url: `/Appointments/GetById/${id}`,
+                type: "GET",
+                beforeSend: function () {
+                    Swal.fire({ title: "Yükleniyor...", allowOutsideClick: false, showConfirmButton: false });
+                },
+                success: function (response) {
+                    Swal.close();
+                    if (response.success) {
+                        const data = response.data;
+
+                        $("#updateAppointmentId").val(data.id);
+                        $("#updateAppointmentDate").val(data.appointmentDate);
+
+                        $.ajax({
+                            url: "/Appointments/GetServices",
+                            type: "GET",
+                            success: function (res) {
+                                if (res.success) {
+                                    const serviceDropdown = $("#updateServiceId");
+                                    serviceDropdown.empty();
+                                    res.services.forEach(service => {
+                                        const option = new Option(service.name, service.id);
+                                        serviceDropdown.append(option);
+                                    });
+                                    $("#updateServiceId").val(data.serviceId);
+                                    $("#updateAppointmentModal").modal("show");
+                                }
+                            },
+                            error: function () {
+                                Swal.fire("Hata", "Hizmet listesi yüklenemedi.", "error");
+                            }
+                        });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata", "Randevu bilgileri alınamadı.", "error");
+                }
+            });
+        };
+
+        // Handle appointment update
+        $("#updateAppointmentBtn").click(function () {
+            const data = {
+                Id: $("#updateAppointmentId").val(),
+                ServiceId: $("#updateServiceId").val(),
+                AppointmentDate: $("#updateAppointmentDate").val()
+            };
+
+            $.ajax({
+                url: "/Appointments/Update",
+                type: "POST",
+                data: data,
+                beforeSend: function () {
+                    Swal.fire({ title: "Güncelleniyor...", allowOutsideClick: false, showConfirmButton: false });
+                },
+                success: function (response) {
+                    Swal.close();
+                    if (response.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Başarılı",
+                            text: response.message,
+                            showConfirmButton: true
+                        }).then(() => {
+                            $(`#appointment-row-${response.appointment.id}`).html(`
+                                
+                                <td>${response.appointment.serviceName}</td>
+                                <td>${response.appointment.appointmentDate}</td>
+                                <td>${response.appointment.status}</td>
+                                <td>
+                                    <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
+                                    <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('${response.appointment.id}')">Sil</button>
+                                </td>`);
+
+                            $("#updateAppointmentModal").modal("hide");
+                        });
+                    } else {
+                        Swal.fire("Hata", response.errorMessage, "error");
+                    }
+                },
+                error: function () {
+                    Swal.fire("Hata", "Randevu güncellenemedi.", "error");
+                }
+            });
+        });
+
+        // Handle appointment deletion
+        window.confirmDelete = function (id) {
+            Swal.fire({
+                title: 'Silmek istediğinize emin misiniz?',
+                text: "Bu işlemi geri alamazsınız!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/Appointments/Delete",
+                        type: "POST",
+                        data: { id: id },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Silindi!', response.message, 'success').then(() => {
+                                    $(`#appointment-row-${id}`).remove();
+                                });
+                            } else {
+                                Swal.fire('Hata!', response.errorMessage, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata!', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                        }
+                    });
+                }
+            });
+        };
+    });
+</script>

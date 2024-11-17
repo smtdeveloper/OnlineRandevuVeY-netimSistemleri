@@ -1,0 +1,102 @@
+﻿@model Entities.DTOs.Appointment.AppointmentDto
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white text-center">
+            <h2>Randevu Detayları</h2>
+        </div>
+        <div class="card-body">
+            @if (Model != null)
+            {
+                <table class="table table-hover">
+                    <tbody>
+                        <tr>
+                            <th scope="row" class="text-secondary">Kullanıcı Adı</th>
+                            <td>@Model.UserName</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="text-secondary">Hizmet Adı</th>
+                            <td>@Model.ServiceName</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="text-secondary">Randevu Tarihi</th>
+                            <td>@Model.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="text-secondary">Durum</th>
+                            <td>
+                                @if (Model.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">Beklemede</span>
+                                }
+                                else if (Model.Status == "Completed")
+                                {
+                                    <span class="badge bg-success">Tamamlandı</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">@Model.Status</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row" class="text-secondary">Oluşturulma Tarihi</th>
+                            <td>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-center mt-4">
+                    <a href="@Url.Action("Index", "Appointments")" class="btn btn-secondary me-2">
+                        <i class="bi bi-arrow-left"></i> Geri Dön
+                    </a>
+                   
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <strong>Hata:</strong> Randevu bilgileri bulunamadı!
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Silme işlemi için SweetAlert entegrasyonu
+        window.confirmDelete = function (id) {
+            Swal.fire({
+                title: 'Randevuyu silmek istediğinize emin misiniz?',
+                text: "Bu işlemi geri alamazsınız!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Sil!',
+                cancelButtonText: 'Hayır, İptal Et'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "/Appointments/Delete",
+                        type: "POST",
+                        data: { id: id },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire('Silindi!', response.message, 'success').then(() => {
+                                    window.location.href = "@Url.Action("Index", "Appointments")";
+                                });
+                            } else {
+                                Swal.fire('Hata!', response.errorMessage, 'error');
+                            }
+                        },
+                        error: function () {
+                            Swal.fire('Hata!', 'Bir hata oluştu. Lütfen tekrar deneyin.', 'error');
+                        }
+                    });
+                }
+            });
+        };
+    </script>
+}

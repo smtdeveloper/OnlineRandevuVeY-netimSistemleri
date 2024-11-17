@@ -1,0 +1,98 @@
+﻿@using System.Text.Json;
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dinçer | Giriş</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.20/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+            .login-container h2 {
+                font-size: 24px;
+                font-weight: bold;
+                margin-bottom: 20px;
+                text-align: center;
+                color: #007bff;
+            }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+            .btn-primary:hover {
+                background-color: #0056b3;
+                border-color: #0056b3;
+            }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            background-color: #f8f9fa;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Dinçer </h2>
+        <p class="text-center mb-4">Online Randevu ve Yönetim Sistemi</p>
+        <form asp-action="Login" method="post">
+            <div class="form-group mb-3">
+                <label for="username">Kullanıcı Adı</label>
+                <input type="text" class="form-control" id="username" name="UserName" placeholder="Kullanıcı adınızı girin" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="password">Şifre</label>
+                <input type="password" class="form-control" id="password" name="Password" placeholder="Şifrenizi girin" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+        </form>
+        <hr class="my-4">
+        <p class="text-center">© 2024 Dinçer. Tüm Hakları Saklıdır.</p>
+    </div>
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Hatalı giriş mesajı
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Hata',
+                        text: @Html.Raw(JsonSerializer.Serialize(TempData["ErrorMessage"]))
+                    });
+            </text>
+        }
+
+        
+    </script>
+</body>
+<footer>
+    <small>© 2024 Dinçer | Online Randevu ve Yönetim Sistemi</small>
+</footer>
+</html>

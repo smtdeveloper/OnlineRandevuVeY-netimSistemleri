@@ -1,0 +1,97 @@
+﻿@model Entities.DTOs.Auth.AssignRoleRequest
+
+@{
+    ViewData["Title"] = "Kullanıcıya Rol Ata";
+}
+
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Kullanıcıya Rol Ata</h4>
+    </div>
+    <div class="card-body">
+        <form asp-action="AssignRole" method="post">
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="mb-4">
+                <label for="SelectedRole" class="form-label">Rol Seçin</label>
+                <select asp-for="SelectedRole" class="form-select">
+                    <option value="" disabled selected>Bir rol seçin</option>
+                    @foreach (var role in Model.AvailableRoles)
+                    {
+                        <option value="@role.Id">@role.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-check-circle"></i> Rol Ata
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left-circle"></i> Geri Dön
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<div class="card shadow-sm">
+    <div class="card-header bg-secondary text-white">
+        <h4 class="mb-0">Atanmış Roller</h4>
+    </div>
+    <div class="card-body">
+        @if (Model.AssignedRoles != null && Model.AssignedRoles.Any())
+        {
+            <ul class="list-group">
+                @foreach (var role in Model.AssignedRoles)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            <i class="bi bi-shield-fill-check text-success me-2"></i> @role.Name
+                        </span>
+                        <form asp-action="RemoveRole" method="post" class="mb-0">
+                            <input type="hidden" name="userId" value="@Model.UserId" />
+                            <input type="hidden" name="role" value="@role.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-x-circle"></i> Geri Çek
+                            </button>
+                        </form>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p class="text-muted">Kullanıcıya atanmış herhangi bir rol bulunmamaktadır.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var successMessage = '@Html.Raw(TempData["SuccessMessage"])';
+            var errorMessage = '@Html.Raw(TempData["ErrorMessage"])';
+
+            if (successMessage) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başarılı',
+                    text: successMessage,
+                    confirmButtonText: 'Tamam'
+                });
+            }
+
+            if (errorMessage) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata',
+                    text: errorMessage,
+                    confirmButtonText: 'Tamam'
+                });
+            }
+        });
+    </script>
+}
