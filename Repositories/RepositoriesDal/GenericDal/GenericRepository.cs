@@ -18,5 +18,4 @@ public class GenericRepository<T>(AppointmentDbContext context) : IGenericReposi
     public void Update(T entity) => _dbSet.Update(entity);
 
     public IQueryable<T> Where(Expression<Func<T, bool>> expression) => _dbSet.Where(expression).AsNoTracking();
-
 }

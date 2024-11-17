@@ -1,6 +1,4 @@
-﻿using Entities.Enums;
-
-namespace Entities.Model;
+﻿namespace Entities.Model;
 
 public class User : BaseEntity
 {

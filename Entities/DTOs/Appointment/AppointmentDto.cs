@@ -14,6 +14,4 @@ namespace Entities.DTOs.Appointment
         public DateTime CreatedDate { get; set; }
         public bool IsDelete { get; set; }
     }
-
-
 }

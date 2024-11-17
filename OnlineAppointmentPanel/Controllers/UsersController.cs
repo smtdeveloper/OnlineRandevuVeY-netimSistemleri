@@ -11,12 +11,11 @@ namespace OnlineAppointmentPanel.Controllers
     public class UsersController : Controller
     {
         private readonly IUserService _userService;
-        private readonly IMapper _mapper;
+        
 
-        public UsersController(IUserService userService, IMapper mapper)
+        public UsersController(IUserService userService)
         {
-            _userService = userService;
-            _mapper = mapper;
+            _userService = userService;           
         }
 
         [Authorize(Roles = nameof(UserRoles.Admin))]
@@ -67,7 +66,6 @@ namespace OnlineAppointmentPanel.Controllers
             return View(request);
         }
 
-
         [Authorize(Roles = nameof(UserRoles.Admin))]
         [HttpDelete]
         [Route("/Users/Delete/{id}")]
@@ -80,7 +78,6 @@ namespace OnlineAppointmentPanel.Controllers
             }
             return Json(new { success = false, errorMessage = result.ErrorMessage });
         }
-
 
         [Authorize(Roles = nameof(UserRoles.Admin))]
         [HttpPost]
@@ -104,7 +101,6 @@ namespace OnlineAppointmentPanel.Controllers
                 return View("Error", result.ErrorMessage);
             }
 
-            // Kullanıcının atanmış rollerini alıyoruz
             var assignedRoles = result.Data.Roles;
 
             var model = new AssignRoleRequest
@@ -120,7 +116,6 @@ namespace OnlineAppointmentPanel.Controllers
                                      })
                                      .ToList(),
 
-                // Kullanıcının atanmış rollerini modelde gösteriyoruz
                 AssignedRoles = assignedRoles.Select(r => new RoleDto
                 {
                     Id = (int)r,
@@ -150,7 +145,6 @@ namespace OnlineAppointmentPanel.Controllers
                 return View(request);
             }
 
-            // Kullanıcının mevcut rollerini alıyoruz
             var userResult = await _userService.GetByIdAsync(request.UserId);
             if (!userResult.IsSuccess || userResult.Data == null)
             {
@@ -158,14 +152,12 @@ namespace OnlineAppointmentPanel.Controllers
                 return View(request);
             }
 
-            // Eğer kullanıcıya atanmak istenen rol zaten atanmışsa, hata mesajı döndürüyoruz
             if (userResult.Data.Roles.Contains(request.SelectedRole))
             {
                 TempData["ErrorMessage"] = "Bu rol zaten atanmış durumda.";
                 return RedirectToAction("AssignRole", new { id = request.UserId });
             }
 
-            // Rol atanması
             var result = await _userService.AssignRoleAsync(request.UserId, request.SelectedRole);
             if (result.IsSuccess)
             {

@@ -1,5 +1,4 @@
-﻿using Azure;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace Repositories.RepositoriesDal.GenericDal;
 

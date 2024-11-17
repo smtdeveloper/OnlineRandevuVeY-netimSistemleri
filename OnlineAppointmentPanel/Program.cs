@@ -1,4 +1,3 @@
-using Entities.Model;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
@@ -12,8 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.Configure<ApiBehaviorOptions>(o => o.SuppressModelStateInvalidFilter = true);
-
-// JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -29,14 +26,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Auth/Login"; // Kullanýcý login deðilse bu sayfaya yönlendirilir
-        options.ExpireTimeSpan = TimeSpan.FromHours(1); // Cookie süresi
+        options.LoginPath = "/Auth/Login";
+        options.ExpireTimeSpan = TimeSpan.FromHours(1);
     });
-
 
 builder.Services.AddRepositories(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
@@ -56,9 +51,9 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseRouting();
 
-// Authentication ve Authorization Middleware'lerini burada kullanýyoruz
-app.UseAuthentication(); // Doðru konum: Authentication middleware
-app.UseAuthorization();  // Authorization middleware
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",

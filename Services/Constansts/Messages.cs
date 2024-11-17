@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Services.Constansts;
+﻿namespace Services.Constansts;
 
 public static class Messages
 {
-    public const string x = " ";
+    public const string x = "";
 }

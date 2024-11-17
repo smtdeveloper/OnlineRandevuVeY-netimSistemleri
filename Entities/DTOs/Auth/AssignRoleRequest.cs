@@ -1,6 +1,4 @@
 ﻿using Entities.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace Entities.DTOs.Auth
 {
@@ -11,5 +9,4 @@ namespace Entities.DTOs.Auth
         public List<RoleDto> AvailableRoles { get; set; } = new List<RoleDto>();
         public List<RoleDto> AssignedRoles { get; set; } = new List<RoleDto>();
     }
-
 }

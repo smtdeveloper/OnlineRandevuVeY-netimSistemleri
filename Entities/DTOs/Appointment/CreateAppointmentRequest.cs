@@ -1,6 +1,4 @@
-﻿using Entities.Enums;
-
-namespace Entities.DTOs.Appointment;
+﻿namespace Entities.DTOs.Appointment;
 public class CreateAppointmentRequest 
 {
     public Guid UserId { get; set; }

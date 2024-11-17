@@ -1,6 +1,4 @@
-﻿using Entities.Enums;
-
-namespace Entities.DTOs.UserRole;
+﻿namespace Entities.DTOs.UserRole;
 
 public class CreateUserRoleResponse
 {

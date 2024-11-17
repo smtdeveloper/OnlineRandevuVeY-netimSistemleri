@@ -17,4 +17,3 @@ public class UpdateAppointmentResponse
     public DateTime AppointmentDate { get; set; }
     public AppointmentStatus Status { get; set; }
 }
-

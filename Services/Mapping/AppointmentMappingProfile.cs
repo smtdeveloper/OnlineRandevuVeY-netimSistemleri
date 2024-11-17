@@ -9,7 +9,6 @@ public class AppointmentMappingProfile : Profile
     public AppointmentMappingProfile()
     {
         CreateMap<Appointment, AppointmentDto>().ReverseMap();
-        CreateMap<AppointmentDto, UpdateAppointmentRequest>().ReverseMap();
-
+        CreateMap<AppointmentDto, UpdateAppointmentRequest>().ReverseMap()
     }
 }

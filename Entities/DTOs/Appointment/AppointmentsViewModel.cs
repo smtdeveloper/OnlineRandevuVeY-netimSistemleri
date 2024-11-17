@@ -6,6 +6,4 @@
         public bool IsAdmin { get; set; }
         public List<AppointmentDto> Appointments { get; set; } = new List<AppointmentDto>();
     }
-
-
 }

@@ -160,35 +160,26 @@ namespace Services.AppServices.UserServices
 
         public async Task<ServiceResult<bool>> RemoveRoleAsync(Guid userId, UserRoles role)
         {
-            // Hata ve başarı sonuçlarını döndürebilmek için bir ServiceResult örneği oluşturuyoruz.
             var serviceResult = new ServiceResult<bool>();
 
-            // Kullanıcıyı veritabanından alıyoruz.
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                // Kullanıcı bulunamazsa hata sonucu döndürülür.
                 return serviceResult.Fail("Kullanıcı bulunamadı.", HttpStatusCode.NotFound);
             }
 
-            // Kullanıcının belirtilen role sahip olup olmadığını kontrol ediyoruz.
             var userRole = user.Roles.FirstOrDefault(r => r.Role == role);
             if (userRole == null)
             {
-                // Kullanıcıda rol yoksa hata sonucu döndürülür.
                 return serviceResult.Fail("Bu rol kullanıcıda mevcut değil.", HttpStatusCode.BadRequest);
             }
-
-            // Rol kullanıcıdan kaldırılır.
+            
             user.Roles.Remove(userRole);
             await _unitOfWork.SaveChangesAsync();
-
-            // Başarıyla kaldırıldığında başarılı sonucu döndürür.
+            
             return serviceResult.Success(true);
+        
         }
-
-
-
 
     }
 }

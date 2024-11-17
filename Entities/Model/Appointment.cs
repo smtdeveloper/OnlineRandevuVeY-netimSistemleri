@@ -13,4 +13,3 @@ public class Appointment : BaseEntity
     public User? User { get; set; } 
     public Service? Service { get; set; }
 }
- 

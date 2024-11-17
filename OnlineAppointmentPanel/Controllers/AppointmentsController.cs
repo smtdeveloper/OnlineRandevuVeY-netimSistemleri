@@ -37,7 +37,6 @@ namespace OnlineAppointmentPanel.Controllers
             return View(result.Data);
         }
 
-
         [HttpGet]
         [Route("Appointments/GetById/{id}")]
         public async Task<JsonResult> GetById(Guid id)

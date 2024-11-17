@@ -46,20 +46,16 @@ public class AppointmentService : IAppointmentService
         await _appointmentRepository.AddAsync(appointment);
         await _unitOfWork.SaveChangesAsync();
 
-        // ServiceName'i Service tablosundan getirme
         var service = await _serviceRepository.GetByIdAsync(request.ServiceId);
 
         return new ServiceResult<CreateAppointmentResponse>().Success(new CreateAppointmentResponse
         {
             Id = appointment.Id,
-            ServiceName = service?.Name, // Burada ServiceName atanıyor
+            ServiceName = service?.Name,
             AppointmentDate = appointment.AppointmentDate,
             Status = appointment.Status.ToString()
         });
     }
-
-
-
 
     public async Task<ServiceResult<UpdateAppointmentResponse>> UpdateAsync(UpdateAppointmentRequest request)
     {
@@ -255,7 +251,5 @@ public class AppointmentService : IAppointmentService
 
         return new ServiceResult<AppointmentsViewModel>().Fail("Randevular yüklenemedi.");
     }
-
-
 
 }

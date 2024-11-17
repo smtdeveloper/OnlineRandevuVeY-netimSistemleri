@@ -1,5 +1,4 @@
-﻿using Entities.DTOs.Auth;
-using Entities.DTOs.Service;
+﻿using Entities.DTOs.Service;
 using Entities.Model;
 using System.Linq.Expressions;
 
