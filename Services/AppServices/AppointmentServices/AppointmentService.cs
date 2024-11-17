@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Repositories.RepositoriesDal.AppointmentDal;
 using Repositories.RepositoriesDal.ServiceDal;
 using Repositories.UnitOfWorks;
-using Services.BusinessRules;
 using System.Linq.Expressions;
 using System.Security.Claims;
 
@@ -123,7 +122,7 @@ public class AppointmentService : IAppointmentService
         var appointment = await _appointmentRepository.GetByAppointmentIdAsync(id);
         if (appointment == null)
         {
-            return new ServiceResult<AppointmentDto?>().Fail("Appointment not found", System.Net.HttpStatusCode.NotFound);
+            return new ServiceResult<AppointmentDto?>().Fail("Randevu bulunamadı.", System.Net.HttpStatusCode.NotFound);
         }
 
         var appointmentDto = new AppointmentDto

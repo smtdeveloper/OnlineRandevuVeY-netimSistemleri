@@ -27,13 +27,11 @@ namespace OnlineAppointmentPanel.Controllers
         public async Task<IActionResult> Index()
         {
             var result = await _appointmentService.GetAppointmentsForUserAsync();
-
             if (!result.IsSuccess)
             {
                 ViewBag.ErrorMessage = string.Join(",", result.ErrorMessage);
                 return View();
             }
-
             ViewBag.IsCustomer = result.Data.IsCustomer;
             ViewBag.IsAdmin = result.Data.IsAdmin;
             return View(result.Data);
@@ -163,12 +161,8 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new { success = false, errorMessage = errors[0], errors });
             }
 
-            var originalData = await _appointmentService.GetByIdAsync(request.Id);
-            if (!originalData.IsSuccess || originalData.Data == null)
-            {
-                return Json(new { success = false, errorMessage = "Randevu bulunamadı." });
-            }
-
+            var originalData = await _appointmentService.GetByIdAsync(request.Id);  
+            
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (User.IsInRole(nameof(UserRoles.Customer)) &&
                 (userIdClaim == null || originalData.Data.UserId.ToString() != userIdClaim))

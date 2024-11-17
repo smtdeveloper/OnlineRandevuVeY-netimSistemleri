@@ -5,7 +5,6 @@ using Entities.Model;
 using Microsoft.EntityFrameworkCore;
 using Repositories.RepositoriesDal.UserDal;
 using Repositories.UnitOfWorks;
-using Services.BusinessRules;
 using System.Linq.Expressions;
 using System.Net;
 
