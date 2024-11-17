@@ -31,37 +31,40 @@
                 </tr>
             </thead>
             <tbody id="appointmentList">
-                @foreach (var appointment in Model)
+                @if (Model != null)
                 {
-                    <tr id="appointment-row-@appointment.Id">
-                        @if (ViewBag.IsAdmin)
-                        {
-                            <td>@appointment.UserName</td>
-                        }
-                        <td>@appointment.ServiceName</td>
-                        <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
-                        <td class="status-cell" data-status="@appointment.Status"></td>
-                        <td>
-                            <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
-                            @if (ViewBag.IsCustomer)
-                            {
-                                <a href="javascript:void(0)" onclick="openUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Güncelle</a>
-                            }
+                    @foreach (var appointment in Model)
+                    {
+                        <tr id="appointment-row-@appointment.Id">
                             @if (ViewBag.IsAdmin)
                             {
-                                <a href="javascript:void(0)" onclick="openStatusUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Durum Güncelle</a>
+                                <td>@appointment.UserName</td>
                             }
-                            <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('@appointment.Id')">Sil</button>
-                        </td>
-                    </tr>
-                }
+                            <td>@appointment.ServiceName</td>
+                            <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="status-cell" data-status="@appointment.Status"></td>
+                            <td>
+                                <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
+                                @if (ViewBag.IsCustomer)
+                                {
+                                    <a href="javascript:void(0)" onclick="openUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Güncelle</a>
+                                }
+                                @if (ViewBag.IsAdmin)
+                                {
+                                    <a href="javascript:void(0)" onclick="openStatusUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Durum Güncelle</a>
+                                }
+                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('@appointment.Id')">Sil</button>
+                            </td>
+                        </tr>
+                    }
+                }               
             </tbody>
         </table>
     </div>
 </div>
 
 
-<!-- Add Appointment Modal -->
+
 <div class="modal fade" id="addAppointmentModal" tabindex="-1" aria-labelledby="addAppointmentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -89,7 +92,7 @@
     </div>
 </div>
 
-<!-- Update Appointment Modal -->
+
 <div class="modal fade" id="updateAppointmentModal" tabindex="-1" aria-labelledby="updateAppointmentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -118,7 +121,7 @@
     </div>
 </div>
 
-<!-- Status Update Modal -->
+
 <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -132,8 +135,7 @@
                     <div class="mb-3">
                         <label for="statusSelect" class="form-label">Durum Seçin</label>
                         <select id="statusSelect" name="Status" class="form-select" required>
-                            <option value="">Durum Seçin</option>
-                            <!-- Status options will be loaded dynamically -->
+                            <option value="">Durum Seçin</option>                            
                         </select>
                     </div>
                 </form>
@@ -147,14 +149,28 @@
 </div>
 
 
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                icon: "error",
+                title: "Hata",
+                text: "@Html.Raw(ViewBag.ErrorMessage)",
+                confirmButtonText: "Tamam"
+            });
+        });
+    </script>
+}
 
 
-<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
       $(document).ready(function () {
-        // Türkçe çeviri
+        
         const statusTranslations = {
             "Pending": "Beklemede",
             "Approved": "Onaylandı",
@@ -162,17 +178,17 @@
             "Completed": "Tamamlandı"
         };
 
-        // Durumları Türkçeye çevir ve DOM'a uygula
+       
         $(".status-cell").each(function () {
-            const status = $(this).data("status"); // Backend'den gelen durum
-            const translatedStatus = statusTranslations[status] || status; // Çeviri veya orijinal değer
-            $(this).text(translatedStatus); // Türkçeyi DOM'a yansıt
+            const status = $(this).data("status"); 
+            const translatedStatus = statusTranslations[status] || status; 
+            $(this).text(translatedStatus); 
         });
 
-        // Durumları yükle
+        
         function loadStatusOptions() {
             $.ajax({
-                url: "/Appointments/GetStatuses", // Backend endpoint to fetch statuses
+                url: "/Appointments/GetStatuses", 
                 type: "GET",
                 success: function (response) {
                     if (response.success) {
@@ -181,7 +197,7 @@
                         statusDropdown.append(new Option("Durum Seçin", ""));
 
                         response.statuses
-                            .filter(status => status.name !== "Unknown") // Unknown'u gizle
+                            .filter(status => status.name !== "Bilinmiyor") 
                             .forEach(status => {
                                 const translatedName = statusTranslations[status.name] || status.name;
                                 statusDropdown.append(new Option(translatedName, status.id));
@@ -196,14 +212,14 @@
             });
         }
 
-        // Durum güncelleme modalını aç
+        
         window.openStatusUpdateModal = function (id) {
             $("#statusUpdateAppointmentId").val(id);
-            loadStatusOptions(); // Durumları modal açıldığında yükle
+            loadStatusOptions(); 
             $("#statusUpdateModal").modal("show");
         };
 
-        // Durum güncelleme işlemi
+        
         $("#updateStatusBtn").click(function () {
             const data = {
                 Id: $("#statusUpdateAppointmentId").val(),
@@ -216,7 +232,7 @@
             }
 
             $.ajax({
-                url: "/Appointments/UpdateStatus", // Backend endpoint for updating status
+                url: "/Appointments/UpdateStatus",
                 type: "POST",
                 data: data,
                 beforeSend: function () {
@@ -238,11 +254,10 @@
                             text: response.message,
                             showConfirmButton: true
                         }).then(() => {
-                            // Güncellenen durumu DOM'da göster
+                            
                             const translatedStatus = statusTranslations[response.appointment.status] || response.appointment.status;
                             $(`#appointment-row-${response.appointment.id} .status-cell`).text(translatedStatus);
 
-                            // Modal'ı kapat
                             $("#statusUpdateModal").modal("hide");
                         });
                     } else {
@@ -261,7 +276,7 @@
 
 <script>
     $(document).ready(function () {
-        // Fetch services for the dropdown
+        
         function loadServices() {
             $.ajax({
                 url: "/Appointments/GetServices",
@@ -284,12 +299,12 @@
             });
         }
 
-        // Load services when modal is opened
+        
         $("#addAppointmentModal").on("show.bs.modal", function () {
             loadServices();
         });
 
-        // Handle appointment creation
+        
         $("#createAppointmentBtn").click(function () {
             const data = {
                 ServiceId: $("#serviceId").val(),
@@ -341,7 +356,7 @@
             });
         });
 
-        // Open update modal and fetch data
+        
         window.openUpdateModal = function (id) {
             $("#updateAppointmentId").val("");
             $("#updateServiceId").empty();
@@ -390,7 +405,7 @@
             });
         };
 
-        // Handle appointment update
+        
         $("#updateAppointmentBtn").click(function () {
             const data = {
                 Id: $("#updateAppointmentId").val(),
@@ -437,7 +452,7 @@
             });
         });
 
-        // Handle appointment deletion
+        
         window.confirmDelete = function (id) {
             Swal.fire({
                 title: 'Silmek istediğinize emin misiniz?',

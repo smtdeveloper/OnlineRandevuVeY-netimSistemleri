@@ -27,6 +27,8 @@ public static class ServiceExtensions
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+        services.AddHttpContextAccessor();
+
         return services;
     }
 }

@@ -3,12 +3,14 @@ using Entities.DTOs.Appointment;
 using Entities.DTOs.UserRole;
 using Entities.Enums;
 using Entities.Model;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Repositories.RepositoriesDal.AppointmentDal;
 using Repositories.RepositoriesDal.ServiceDal;
 using Repositories.UnitOfWorks;
 using Services.BusinessRules;
 using System.Linq.Expressions;
+using System.Security.Claims;
 
 namespace Services.AppServices.AppointmentServices;
 
@@ -18,13 +20,16 @@ public class AppointmentService : IAppointmentService
     private readonly IServiceRepository _serviceRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-         
-    public AppointmentService(IAppointmentRepository appointmentRepository, IUnitOfWork unitOfWork, IMapper mapper, IServiceRepository serviceRepository)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+
+    public AppointmentService(IAppointmentRepository appointmentRepository, IUnitOfWork unitOfWork, IMapper mapper, IServiceRepository serviceRepository, IHttpContextAccessor  httpContextAccessor )
     {
         _appointmentRepository = appointmentRepository;
         _serviceRepository = serviceRepository;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<ServiceResult<CreateAppointmentResponse>> CreateAsync(CreateAppointmentRequest request)
@@ -141,14 +146,12 @@ public class AppointmentService : IAppointmentService
 
     public async Task<ServiceResult<AppointmentDto?>> GetByIdAsync(Guid id)
     {
-        var appointment = await _appointmentRepository.GetByAppointmentIdAsync(id); // Service dahil olacak şekilde ilişki yüklenir
-
+        var appointment = await _appointmentRepository.GetByAppointmentIdAsync(id);
         if (appointment == null)
         {
             return new ServiceResult<AppointmentDto?>().Fail("Appointment not found", System.Net.HttpStatusCode.NotFound);
         }
 
-        // AppointmentDto içerisine Service bilgilerini de map eder
         var appointmentDto = new AppointmentDto
         {
             Id = appointment.Id,
@@ -169,15 +172,23 @@ public class AppointmentService : IAppointmentService
 
     public async Task<ServiceResult<bool>> SoftDeleteAsync(Guid id)
     {
-        
-        var entity = await _appointmentRepository.GetByIdAsync(id);
-        var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
+        var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        Guid? userId = userIdClaim != null ? Guid.Parse(userIdClaim) : null;
 
+        bool isCustomer = _httpContextAccessor.HttpContext?.User.IsInRole(nameof(UserRoles.Customer)) ?? false;
+        var entity = await _appointmentRepository.GetByIdAsync(id);
+      
+        var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
         if (businessRuleResult != null)
         {
             return businessRuleResult;
         }
 
+        if (isCustomer && (userId == null || entity.UserId != userId))
+        {
+            return new ServiceResult<bool>().Fail("Sadece kendi randevularınızı silebilirsiniz.");
+        }
+       
         entity.IsDelete = true;
         entity.DeletedDate = DateTime.UtcNow;
         _appointmentRepository.Update(entity);
@@ -185,6 +196,8 @@ public class AppointmentService : IAppointmentService
 
         return new ServiceResult<bool>().Success(true);
     }
+
+
     public async Task<ServiceResult<List<AppointmentDto>>> Where(Expression<Func<Appointment, bool>> expression)
     {
         var appointments = await _appointmentRepository
