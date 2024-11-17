@@ -13,10 +13,13 @@ Proje Kapsamında:
    - Uygulamanın farklı cihazlardan ve ortamlardan erişilebilir olması sağlanmıştır.
 
 3. **Panel Yapısı:**
-   - Admin ve kullanıcı panelleri genelde ayrı ayrı tasarlanabilir.
-   - Ancak, bu projede **rol bazlı kontrollerin** daha etkili uygulanabilmesi için **tek bir panel** kullanılmıştır.
-   - Kullanıcılar ve yöneticiler, rollerine göre yalnızca ilgili sayfalara erişebilir.
-   - Bu yaklaşım, kodun sürdürülebilirliğini artırmış ve geliştirme sürecini hızlandırmıştır.
+   - Sistem tek bir login sayfasına sahiptir; hem Admin hem de Customer bu sayfadan giriş yapar.
+   - Kullanıcılar rollerine göre sadece yetkili oldukları sayfalara erişebilir ve görebilir:
+     - **Customer:** Kullanıcılar sayfasına erişemez ve bu sayfayı navbarda göremez.
+     - **Admin:** Randevu alamaz ve bu sayfaya erişemez ya da navbarda göremez.
+   - Büyük ölçekli projelerde, genellikle Admin'in kullanacağı projeyi Customer'ın kullanacağı projeden ayırmayı tercih ederim. Alternatif olarak **Areas** kullanılarak daha organize bir yapı sağlanabilir.
+   - Ancak bu projede, **rol bazlı erişim kontrollerini** daha etkin bir şekilde uygulayabilmek için **tek bir MVC panel projesi** geliştirdim.
+
 
 -----------------------------------------
 VERİTABANI YAPISI
