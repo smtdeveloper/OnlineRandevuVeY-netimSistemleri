@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Entities.DTOs.Appointment.AppointmentDto>
+﻿@using Entities.DTOs.Appointment
+@model AppointmentsViewModel
 
 @{
     ViewData["Title"] = "Randevu Listesi";
@@ -8,7 +9,7 @@
 
 <div class="card">
     <div class="card-body">
-        @if (ViewBag.IsCustomer)
+        @if (Model.IsCustomer)
         {
             <div class="d-flex justify-content-end mb-3">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
@@ -20,7 +21,7 @@
         <table class="table table-hover">
             <thead class="table-primary">
                 <tr>
-                    @if (ViewBag.IsAdmin)
+                    @if (Model.IsAdmin)
                     {
                         <th>Kullanıcı Adı</th>
                     }
@@ -31,12 +32,12 @@
                 </tr>
             </thead>
             <tbody id="appointmentList">
-                @if (Model != null)
+                @if (Model.Appointments.Any())
                 {
-                    @foreach (var appointment in Model)
+                    @foreach (var appointment in Model.Appointments)
                     {
                         <tr id="appointment-row-@appointment.Id">
-                            @if (ViewBag.IsAdmin)
+                            @if (Model.IsAdmin)
                             {
                                 <td>@appointment.UserName</td>
                             }
@@ -45,11 +46,11 @@
                             <td class="status-cell" data-status="@appointment.Status"></td>
                             <td>
                                 <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
-                                @if (ViewBag.IsCustomer)
+                                @if (Model.IsCustomer)
                                 {
                                     <a href="javascript:void(0)" onclick="openUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Güncelle</a>
                                 }
-                                @if (ViewBag.IsAdmin)
+                                @if (Model.IsAdmin)
                                 {
                                     <a href="javascript:void(0)" onclick="openStatusUpdateModal('@appointment.Id')" class="btn btn-warning btn-sm">Durum Güncelle</a>
                                 }
@@ -57,13 +58,17 @@
                             </td>
                         </tr>
                     }
-                }               
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">Randevu bulunamadı.</td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 </div>
-
-
 
 <div class="modal fade" id="addAppointmentModal" tabindex="-1" aria-labelledby="addAppointmentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -91,7 +96,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="modal fade" id="updateAppointmentModal" tabindex="-1" aria-labelledby="updateAppointmentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -121,7 +125,6 @@
     </div>
 </div>
 
-
 <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -135,7 +138,7 @@
                     <div class="mb-3">
                         <label for="statusSelect" class="form-label">Durum Seçin</label>
                         <select id="statusSelect" name="Status" class="form-select" required>
-                            <option value="">Durum Seçin</option>                            
+                            <option value="">Durum Seçin</option>
                         </select>
                     </div>
                 </form>
@@ -148,15 +151,14 @@
     </div>
 </div>
 
-
-@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+@if (!Model.Appointments.Any())
 {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             Swal.fire({
-                icon: "error",
-                title: "Hata",
-                text: "@Html.Raw(ViewBag.ErrorMessage)",
+                icon: "info",
+                title: "Bilgi",
+                text: "Henüz bir randevu bulunmamaktadır.",
                 confirmButtonText: "Tamam"
             });
         });

@@ -25,11 +25,11 @@
                         <tr>
                             <th scope="row" class="text-secondary">Durum</th>
                             <td>
-                                @if (Model.Status == "Pending")
+                                @if (Model.Status == Entities.Enums.AppointmentStatus.Pending)
                                 {
                                     <span class="badge bg-warning text-dark">Beklemede</span>
                                 }
-                                else if (Model.Status == "Completed")
+                                else if (Model.Status == Entities.Enums.AppointmentStatus.Completed)
                                 {
                                     <span class="badge bg-success">Tamamlandı</span>
                                 }

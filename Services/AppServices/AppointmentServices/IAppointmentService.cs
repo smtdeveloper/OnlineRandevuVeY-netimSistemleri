@@ -15,4 +15,5 @@ public interface IAppointmentService
     Task<ServiceResult<bool>> DeleteAsync(Guid id);
     Task<ServiceResult<UpdateAppointmentResponse>> UpdateAsync(UpdateAppointmentRequest request);
     Task<ServiceResult<UpdateAppointmentStatusResponse>> UpdateStatusAsync(UpdateAppointmentStatusRequest request);
+    Task<ServiceResult<AppointmentsViewModel>> GetAppointmentsForUserAsync();
 }

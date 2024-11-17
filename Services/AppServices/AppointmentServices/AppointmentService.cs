@@ -108,6 +108,10 @@ public class AppointmentService : IAppointmentService
     {
         
         var entity = await _appointmentRepository.GetByIdAsync(id);
+
+        if (entity == null)
+        { return new ServiceResult<bool>().NotFound("Servis bulunamadı."); }
+
         var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
 
         if (businessRuleResult != null)
@@ -125,22 +129,8 @@ public class AppointmentService : IAppointmentService
 
     public async Task<ServiceResult<List<AppointmentDto>>> GetAll()
     {
-        var appointments = await _appointmentRepository.GetAll().Where(a => a.IsDelete == false)
-            .Include(a => a.User) // Kullanıcı bilgisine erişiyoruz
-            .Include(a => a.Service) // Servis bilgisine erişiyoruz
-            .ToListAsync();
-
-        var appointmentDtos = appointments.Select(a => new AppointmentDto
-        {
-            Id = a.Id,
-            UserId = a.UserId,
-            UserName = a.User.UserName, // Kullanıcı adı ekleniyor
-            ServiceName = a.Service.Name,
-            AppointmentDate = a.AppointmentDate,
-            Status = a.Status.ToString(),
-        }).ToList();
-
-        return new ServiceResult<List<AppointmentDto>>().Success(appointmentDtos);
+        List<AppointmentDto> appointments = await _appointmentRepository.GetAllAppointmentAsync();
+        return new ServiceResult<List<AppointmentDto>>().Success(appointments);
     }
 
 
@@ -160,8 +150,7 @@ public class AppointmentService : IAppointmentService
             ServiceId = appointment.ServiceId,
             ServiceName = appointment.Service?.Name ?? "Unknown",
             AppointmentDate = appointment.AppointmentDate,
-            Status = appointment.Status.ToString(),
-            IsDelete = appointment.IsDelete,
+            Status = appointment.Status,            
             CreatedDate = appointment.CreatedDate
         };
 
@@ -177,7 +166,12 @@ public class AppointmentService : IAppointmentService
 
         bool isCustomer = _httpContextAccessor.HttpContext?.User.IsInRole(nameof(UserRoles.Customer)) ?? false;
         var entity = await _appointmentRepository.GetByIdAsync(id);
-      
+
+        if (entity == null)
+        {
+            return new ServiceResult<bool>().NotFound("Servis bulunamadı."); 
+        }
+
         var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
         if (businessRuleResult != null)
         {
@@ -214,8 +208,7 @@ public class AppointmentService : IAppointmentService
             ServiceId = a.ServiceId,
             ServiceName = a.Service.Name, // Servis adı
             AppointmentDate = a.AppointmentDate,
-            Status = a.Status.ToString(),
-            IsDelete = a.IsDelete,
+            Status = a.Status,           
             CreatedDate = a.CreatedDate
         }).ToList();
 
@@ -245,6 +238,51 @@ public class AppointmentService : IAppointmentService
             Status = appointment.Status.ToString()
         });
     }
+
+    public async Task<ServiceResult<AppointmentsViewModel>> GetAppointmentsForUserAsync()
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext == null)
+            return new ServiceResult<AppointmentsViewModel>().Fail("Kullanıcı bilgilerine ulaşılamadı.");
+
+        var userIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        Guid? userId = userIdClaim != null ? Guid.Parse(userIdClaim) : null;
+
+        bool isCustomer = httpContext.User.IsInRole(nameof(UserRoles.Customer));
+        bool isAdmin = httpContext.User.IsInRole(nameof(UserRoles.Admin));
+
+        if (isCustomer)
+        {
+            if (userId == null)
+                return new ServiceResult<AppointmentsViewModel>().Fail("Kullanıcı kimliği bulunamadı.");
+
+            var appointments = await _appointmentRepository.GetAllByUserAppointmentAsync(userId.Value);
+            
+            var appointmentDtos = appointments.Select(a => _mapper.Map<AppointmentDto>(a)).ToList();
+            return new ServiceResult<AppointmentsViewModel>().Success(new AppointmentsViewModel
+            {
+                IsCustomer = isCustomer,
+                IsAdmin = isAdmin,
+                Appointments = appointmentDtos
+            });
+        }
+
+        if (isAdmin)
+        {
+            var appointments = await _appointmentRepository.GetAllAppointmentAsync();               
+
+            var appointmentDtos = appointments.Select(a => _mapper.Map<AppointmentDto>(a)).ToList();
+            return new ServiceResult<AppointmentsViewModel>().Success(new AppointmentsViewModel
+            {
+                IsCustomer = isCustomer,
+                IsAdmin = isAdmin,
+                Appointments = appointmentDtos
+            });
+        }
+
+        return new ServiceResult<AppointmentsViewModel>().Fail("Randevular yüklenemedi.");
+    }
+
 
 
 }
