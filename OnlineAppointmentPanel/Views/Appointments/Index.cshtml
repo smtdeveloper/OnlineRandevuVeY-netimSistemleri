@@ -43,7 +43,7 @@
                             }
                             <td>@appointment.ServiceName</td>
                             <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
-                            <td class="status-cell" data-status="@appointment.Status"></td>
+                            <td class="status-cell" data-status="@appointment.Status.ToString()"></td>
                             <td>
                                 <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
                                 @if (Model.IsCustomer)
@@ -171,7 +171,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-      $(document).ready(function () {
+    $(document).ready(function () {
         
         const statusTranslations = {
             "Pending": "Beklemede",
@@ -180,17 +180,17 @@
             "Completed": "Tamamlandı"
         };
 
-       
+
         $(".status-cell").each(function () {
-            const status = $(this).data("status"); 
-            const translatedStatus = statusTranslations[status] || status; 
-            $(this).text(translatedStatus); 
+            const status = $(this).data("status");
+            const translatedStatus = statusTranslations[status] || status;
+            $(this).text(translatedStatus);
         });
 
-        
+
         function loadStatusOptions() {
             $.ajax({
-                url: "/Appointments/GetStatuses", 
+                url: "/Appointments/GetStatuses",
                 type: "GET",
                 success: function (response) {
                     if (response.success) {
@@ -199,7 +199,7 @@
                         statusDropdown.append(new Option("Durum Seçin", ""));
 
                         response.statuses
-                            .filter(status => status.name !== "Bilinmiyor") 
+                            .filter(status => status.name !== "Bilinmiyor")
                             .forEach(status => {
                                 const translatedName = statusTranslations[status.name] || status.name;
                                 statusDropdown.append(new Option(translatedName, status.id));
@@ -214,14 +214,14 @@
             });
         }
 
-        
+
         window.openStatusUpdateModal = function (id) {
             $("#statusUpdateAppointmentId").val(id);
-            loadStatusOptions(); 
+            loadStatusOptions();
             $("#statusUpdateModal").modal("show");
         };
 
-        
+
         $("#updateStatusBtn").click(function () {
             const data = {
                 Id: $("#statusUpdateAppointmentId").val(),
@@ -256,7 +256,7 @@
                             text: response.message,
                             showConfirmButton: true
                         }).then(() => {
-                            
+
                             const translatedStatus = statusTranslations[response.appointment.status] || response.appointment.status;
                             $(`#appointment-row-${response.appointment.id} .status-cell`).text(translatedStatus);
 
@@ -271,14 +271,7 @@
                 }
             });
         });
-    });
 
-</script>
-
-
-<script>
-    $(document).ready(function () {
-        
         function loadServices() {
             $.ajax({
                 url: "/Appointments/GetServices",
@@ -330,12 +323,13 @@
                             text: response.message,
                             showConfirmButton: true
                         }).then(() => {
+                            const translatedStatus = statusTranslations[response.appointment.status] || response.appointment.status;
                             const newRow = `
                                 <tr id="appointment-row-${response.appointment.id}">
                                     
                                     <td>${response.appointment.serviceName || "Bilinmiyor"}</td>
                                     <td>${response.appointment.appointmentDate || "Tarih yok"}</td>
-                                    <td>${response.appointment.status || "Durum yok"}</td>
+                                    <td class="status-cell" data-status="${response.appointment.status}">${translatedStatus}</td>
                                     <td>
                                         <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
                                         <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>

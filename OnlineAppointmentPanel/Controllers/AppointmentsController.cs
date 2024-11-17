@@ -1,10 +1,10 @@
-﻿using AutoMapper;
-using Entities.DTOs.Appointment;
+﻿using Entities.DTOs.Appointment;
 using Entities.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.AppServices.AppointmentServices;
 using Services.AppServices.ServiceServices;
+using Services.Constansts;
 using System.Security.Claims;
 
 namespace OnlineAppointmentPanel.Controllers
@@ -13,14 +13,12 @@ namespace OnlineAppointmentPanel.Controllers
     public class AppointmentsController : Controller
     {
         private readonly IAppointmentService _appointmentService;
-        private readonly IServiceService _serviceService;
-        private readonly IMapper _mapper;
+        private readonly IServiceService _serviceService;        
 
-        public AppointmentsController(IAppointmentService appointmentService, IServiceService serviceService, IMapper mapper)
+        public AppointmentsController(IAppointmentService appointmentService, IServiceService serviceService)
         {
             _appointmentService = appointmentService;
-            _serviceService = serviceService;
-            _mapper = mapper;
+            _serviceService = serviceService;           
         }
 
         [Authorize(Roles = nameof(UserRoles.Admin) + "," + nameof(UserRoles.Customer))]
@@ -114,17 +112,9 @@ namespace OnlineAppointmentPanel.Controllers
         public async Task<IActionResult> Create(CreateAppointmentRequest request)
         {
             if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return Json(new { success = false, errorMessage = errors[0], errors });
-            }
+                return Json(new { success = false, errorMessage = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()) });
 
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
-            {
-                return Json(new { success = false, errorMessage = "Kullanıcı bilgisi bulunamadı, lütfen tekrar giriş yapınız!" });
-            }
-
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;            
             request.UserId = Guid.Parse(userIdClaim);
 
             var result = await _appointmentService.CreateAsync(request);
@@ -134,19 +124,18 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "Randevu başarıyla oluşturuldu.",
+                    message = Messages.AppointmentHasBeenCreated,
                     appointment = new
                     {
                         Id = createdAppointment.Id,
                         UserName = User.Identity.Name,
                         ServiceName = createdAppointment.ServiceName,
                         AppointmentDate = createdAppointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm"),
-                        Status = createdAppointment.Status
+                        Status = createdAppointment.Status.ToString()
                     }
                 });
 
             }
-
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
 

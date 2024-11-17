@@ -23,7 +23,7 @@ public static class ServiceExtensions
         services.AddScoped<IUserRoleService, UserRoleService>();
         services.AddScoped<ExceptionHandlingMiddleware>();
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());        
         services.AddFluentValidationAutoValidation();
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
