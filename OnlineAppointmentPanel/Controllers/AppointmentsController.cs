@@ -44,8 +44,7 @@ namespace OnlineAppointmentPanel.Controllers
             {
                 return Json(new
                 {
-                    success = true,
-                    message = "Randevu başarıyla oluşturuldu.",
+                    success = true,                    
                     data = result.Data
                 });
             }
@@ -53,7 +52,7 @@ namespace OnlineAppointmentPanel.Controllers
             return Json(new
             {
                 success = false,
-                message = "Bulunamadı!"
+                message = Messages.NotFound,
             });
 
         }
@@ -89,7 +88,7 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new { success = true, services });
             }
 
-            return Json(new { success = false, errorMessage = "Servisler yüklenemedi." });
+            return Json(new { success = false, errorMessage = Messages.ServicesCouldNotBeLoaded });
         }
 
         [HttpGet]
@@ -134,7 +133,6 @@ namespace OnlineAppointmentPanel.Controllers
                         Status = createdAppointment.Status.ToString()
                     }
                 });
-
             }
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
@@ -144,28 +142,22 @@ namespace OnlineAppointmentPanel.Controllers
         public async Task<JsonResult> Update(UpdateAppointmentRequest request)
         {
             if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return Json(new { success = false, errorMessage = errors[0], errors });
-            }
+                return Json(new { success = false, errorMessage = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()) });
 
             var originalData = await _appointmentService.GetByIdAsync(request.Id);  
-            
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (User.IsInRole(nameof(UserRoles.Customer)) &&
                 (userIdClaim == null || originalData.Data.UserId.ToString() != userIdClaim))
             {
-                return Json(new { success = false, errorMessage = "Bu randevuyu güncelleme yetkiniz yok." });
+                return Json(new { success = false, errorMessage = Messages.YouAreNotAuthorizedToUpdateThisAppointment });
             }
-
 
             if (originalData.Data.Status != AppointmentStatus.Pending)
             {
-                return Json(new { success = false, errorMessage = "Sadece beklemede durumundaki randevularınızı güncelleyebilirsiniz." });
+                return Json(new { success = false, errorMessage = Messages.YouCanOnlyUpdateYourPendingAppointments });
             }
             request.Status = AppointmentStatus.Pending;
-
-
             var result = await _appointmentService.UpdateAsync(request);
             if (result.IsSuccess)
             {
@@ -173,7 +165,7 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "Randevu başarıyla güncellendi.",
+                    message = Messages.AppointmentUpdatedSuccessfully,
                     appointment = new
                     {
                         Id = updatedAppointment.Id,
@@ -185,8 +177,6 @@ namespace OnlineAppointmentPanel.Controllers
                     }
                 });
             }
-
-
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
 
@@ -195,10 +185,7 @@ namespace OnlineAppointmentPanel.Controllers
         public async Task<IActionResult> UpdateStatus(UpdateAppointmentStatusRequest request)
         {
             if (!ModelState.IsValid)
-            {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return Json(new { success = false, errorMessage = errors[0], errors });
-            }
+                return Json(new { success = false, errorMessage = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList()) });
 
             var result = await _appointmentService.UpdateStatusAsync(request);
             if (result.IsSuccess)
@@ -206,7 +193,7 @@ namespace OnlineAppointmentPanel.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "Durum başarıyla güncellendi.",
+                    message = Messages.StatusUpdatedSuccessfully,
                     appointment = new
                     {
                         id = result.Data.Id,
@@ -214,7 +201,6 @@ namespace OnlineAppointmentPanel.Controllers
                     }
                 });
             }
-
             return Json(new { success = false, errorMessage = result.ErrorMessage });
         }
 
@@ -225,11 +211,9 @@ namespace OnlineAppointmentPanel.Controllers
 
             if (result.IsSuccess)
             {
-                return Json(new { success = true, message = "Randevu başarıyla silindi.", id = id });
+                return Json(new { success = true, message = Messages.AppointmentDeletedSuccessfully, id = id });
             }
-
             return Json(new { success = false, errorMessage = string.Join(",", result.ErrorMessage) });
         }
-
     }
 }
