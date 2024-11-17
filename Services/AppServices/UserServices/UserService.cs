@@ -51,13 +51,9 @@ namespace Services.AppServices.UserServices
         public async Task<ServiceResult<bool>> DeleteAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(user, nameof(User));
-
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
-
+            if (user == null)
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
+            
             _userRepository.Delete(user);
             await _unitOfWork.SaveChangesAsync();
 
@@ -79,11 +75,8 @@ namespace Services.AppServices.UserServices
         public async Task<ServiceResult<UserDto?>> GetByIdAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
-
             if (user == null)
-            {
-                return new ServiceResult<UserDto?>().Fail("User not found", System.Net.HttpStatusCode.NotFound);
-            }
+                return new ServiceResult<UserDto>().NotFound("Servis bulunamadı.");
 
             var userDto = _mapper.Map<UserDto>(user);
             return new ServiceResult<UserDto?>().Success(userDto);
@@ -93,12 +86,10 @@ namespace Services.AppServices.UserServices
         public async Task<ServiceResult<bool>> SoftDeleteAsync(Guid id)
         {
             var user = await _userRepository.GetByIdAsync(id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(user, nameof(User));
+            if (user == null)
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
 
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
+           
 
             user.IsDelete = true;
             user.DeletedDate = DateTime.UtcNow;
@@ -111,15 +102,10 @@ namespace Services.AppServices.UserServices
         public async Task<ServiceResult<bool>> UpdateAsync(UpdateUserRequest request)
         {
             var user = await _userRepository.GetByIdAsync(request.Id);
-            var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(user, nameof(User));
-
-            if (businessRuleResult != null)
-            {
-                return businessRuleResult;
-            }
-
-            user.UserName = request.UserName;           
+            if (user == null)
+                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
             
+            user.UserName = request.UserName;                       
             _userRepository.Update(user);
             await _unitOfWork.SaveChangesAsync();
 

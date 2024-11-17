@@ -64,37 +64,28 @@ public class AppointmentService : IAppointmentService
 
     public async Task<ServiceResult<UpdateAppointmentResponse>> UpdateAsync(UpdateAppointmentRequest request)
     {
-        // Güncellenmesi gereken randevuyu getir
         var entity = await _appointmentRepository.GetByAppointmentIdAsync(request.Id); // Service dahil olacak
-        var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
+        if (entity == null)
+        { return new ServiceResult<UpdateAppointmentResponse>().NotFound("Bulunamadı."); }
 
-        if (businessRuleResult != null)
-        {
-            return new ServiceResult<UpdateAppointmentResponse>().Fail(businessRuleResult.ErrorMessage);
-        }
-
-        // Güncelleme işlemleri
         entity.ServiceId = request.ServiceId;
         entity.AppointmentDate = request.AppointmentDate;
         entity.Status = request.Status;
 
-        // Randevu güncellendi
         _appointmentRepository.Update(entity);
         await _unitOfWork.SaveChangesAsync();
 
-        // Güncellenen Service bilgisi için Repository üzerinden sorgu
         var updatedService = await _serviceRepository.GetByIdAsync(request.ServiceId);
         if (updatedService == null)
         {
             return new ServiceResult<UpdateAppointmentResponse>().Fail("Hizmet bilgisi bulunamadı.");
         }
 
-        // Güncelleme işlemi tamamlandıktan sonra response DTO'su oluştur
         var response = new UpdateAppointmentResponse
         {
             Id = entity.Id,
             UserId = entity.UserId,
-            ServiceName = updatedService.Name, // Güncellenmiş ServiceName
+            ServiceName = updatedService.Name, 
             AppointmentDate = entity.AppointmentDate,
             Status = entity.Status
         };
@@ -110,14 +101,7 @@ public class AppointmentService : IAppointmentService
         var entity = await _appointmentRepository.GetByIdAsync(id);
 
         if (entity == null)
-        { return new ServiceResult<bool>().NotFound("Servis bulunamadı."); }
-
-        var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
-
-        if (businessRuleResult != null)
-        {
-            return businessRuleResult;
-        }
+        { return new ServiceResult<bool>().NotFound("Bulunamadı."); }
 
         entity.IsDelete = true;
         entity.DeletedDate = DateTime.UtcNow;
@@ -166,22 +150,12 @@ public class AppointmentService : IAppointmentService
 
         bool isCustomer = _httpContextAccessor.HttpContext?.User.IsInRole(nameof(UserRoles.Customer)) ?? false;
         var entity = await _appointmentRepository.GetByIdAsync(id);
-
+        
         if (entity == null)
-        {
-            return new ServiceResult<bool>().NotFound("Servis bulunamadı."); 
-        }
-
-        var businessRuleResult = GenericBusinessRules.CheckEntityNotNull(entity, nameof(Appointment));
-        if (businessRuleResult != null)
-        {
-            return businessRuleResult;
-        }
+            return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
 
         if (isCustomer && (userId == null || entity.UserId != userId))
-        {
             return new ServiceResult<bool>().Fail("Sadece kendi randevularınızı silebilirsiniz.");
-        }
        
         entity.IsDelete = true;
         entity.DeletedDate = DateTime.UtcNow;
