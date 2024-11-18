@@ -16,7 +16,7 @@ Proje Kapsamında:
    - Sistem tek bir login sayfasına sahiptir; hem Admin hem de Customer bu sayfadan giriş yapar.
    - Kullanıcılar rollerine göre sadece yetkili oldukları sayfalara erişebilir ve görebilir:
      - **Customer:** Kullanıcılar sayfasına erişemez ve bu sayfayı navbarda göremez.
-     - **Admin:** Randevu alamaz ve bu sayfaya erişemez ya da navbarda göremez.
+     - **Admin:** Randevu alamaz ve bu sayfaya erişemez ya da göremez.
    - Büyük ölçekli projelerde, genellikle Admin'in kullanacağı projeyi Customer'ın kullanacağı projeden ayırmayı tercih ederim. Alternatif olarak **Areas** kullanılarak daha organize bir yapı sağlanabilir.
    - Ancak bu projede, **rol bazlı erişim kontrollerini** daha etkin bir şekilde uygulayabilmek için **tek bir MVC panel projesi** geliştirdim.
 
@@ -114,15 +114,19 @@ TEKNİK DETAYLAR
 -----------------------------------------
 
 1. **Kimlik Doğrulama ve Yetkilendirme:**
-   - Kullanıcıların şifreleri hashlenerek saklanır.
-   - Roller doğrultusunda erişim kısıtlamaları uygulanır.
-
+   - ** Kimlik Doğrulama:** Kullanıcı oturumları **Cookie Authentication** ile yönetilmektedir. 
+       Kullanıcı giriş yaptığında, kullanıcı bilgileri ve rolleri `Claims` olarak tanımlanır ve bir **ClaimsPrincipal**    ile oturumu başlatılır.
+   - ** Şifre Saklama:** Kullanıcıların şifreleri hashlenerek güvenli bir şekilde saklanır. Bu, şifrelerin doğrudan veritabanında saklanmasını engeller.
+   - ** Rol Tabanlı Erişim:** Kullanıcı rolleri `ClaimTypes.Role` kullanılarak belirlenir. Her kullanıcının rolüne uygun yetkiler sağlanır:
+     - **Admin:** Sadece admin yetkisine sahip sayfalara erişebilir.
+     - **Customer:** Sadece kendine ait sayfalara erişebilir. Admin yetkisine sahip sayfaları göremez.
+   
 2. **Kullanılan Teknolojiler:**
    - ASP.NET Core MVC
    - MSSQL Veritabanı
    - Entity Framework Core
    - AJAX ve jQuery ile sayfa yenilenmeden CRUD işlemleri
-   - Toastr veya SweetAlert ile kullanıcı bildirimleri
+   - SweetAlert ile kullanıcı bildirimleri
 
 
 -----------------------------------------

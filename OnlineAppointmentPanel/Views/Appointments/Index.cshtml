@@ -152,19 +152,6 @@
     </div>
 </div>
 
-@if (!Model.Appointments.Any())
-{
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            Swal.fire({
-                icon: "info",
-                title: "Bilgi",
-                text: "Henüz bir randevu bulunmamaktadır.",
-                confirmButtonText: "Tamam"
-            });
-        });
-    </script>
-}
 @section Scripts { 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -426,6 +413,7 @@
                     Swal.fire({ title: "Güncelleniyor...", allowOutsideClick: false, showConfirmButton: false });
                 },
                 success: function (response) {
+
                     Swal.close();
                     if (response.success) {
                         Swal.fire({
@@ -434,11 +422,12 @@
                             text: response.message,
                             showConfirmButton: true
                         }).then(() => {
+                                const translatedStatus = statusTranslations[response.appointment.status] || response.appointment.status;
                             $(`#appointment-row-${response.appointment.id}`).html(`
                                 
                                 <td>${response.appointment.serviceName}</td>
                                 <td>${response.appointment.appointmentDate}</td>
-                                <td>${response.appointment.status}</td>
+                                <td class="status-cell" data-status="${response.appointment.status}">${translatedStatus}</td>
                                     <td class="text-end">
                                     <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
                                     <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>
