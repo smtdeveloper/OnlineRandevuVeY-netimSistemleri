@@ -5,6 +5,7 @@ using Entities.Model;
 using Microsoft.EntityFrameworkCore;
 using Repositories.RepositoriesDal.UserDal;
 using Repositories.UnitOfWorks;
+using Services.Constansts;
 using System.Linq.Expressions;
 using System.Net;
 
@@ -51,7 +52,7 @@ namespace Services.AppServices.UserServices
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
-                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
+                return new ServiceResult<bool>().NotFound(Messages.UserNotFound);
             
             _userRepository.Delete(user);
             await _unitOfWork.SaveChangesAsync();
@@ -75,7 +76,7 @@ namespace Services.AppServices.UserServices
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
-                return new ServiceResult<UserDto>().NotFound("Servis bulunamadı.");
+                return new ServiceResult<UserDto>().NotFound(Messages.UserNotFound);
 
             var userDto = _mapper.Map<UserDto>(user);
             return new ServiceResult<UserDto?>().Success(userDto);
@@ -86,7 +87,7 @@ namespace Services.AppServices.UserServices
         {
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
-                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
+                return new ServiceResult<bool>().NotFound(Messages.UserNotFound);
 
            
 
@@ -102,7 +103,7 @@ namespace Services.AppServices.UserServices
         {
             var user = await _userRepository.GetByIdAsync(request.Id);
             if (user == null)
-                return new ServiceResult<bool>().NotFound("Servis bulunamadı.");
+                return new ServiceResult<bool>().NotFound(Messages.UserNotFound);
             
             user.UserName = request.UserName;                       
             _userRepository.Update(user);
@@ -139,7 +140,7 @@ namespace Services.AppServices.UserServices
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                return new ServiceResult<bool>().Fail("Kullanıcı bulunamadı.");
+                return new ServiceResult<bool>().Fail(Messages.UserNotFound);
             }
 
             if (user.Roles.All(r => r.Role != role))
@@ -165,13 +166,13 @@ namespace Services.AppServices.UserServices
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                return serviceResult.Fail("Kullanıcı bulunamadı.", HttpStatusCode.NotFound);
+                return serviceResult.Fail(Messages.UserNotFound, HttpStatusCode.NotFound);
             }
 
             var userRole = user.Roles.FirstOrDefault(r => r.Role == role);
             if (userRole == null)
             {
-                return serviceResult.Fail("Bu rol kullanıcıda mevcut değil.", HttpStatusCode.BadRequest);
+                return serviceResult.Fail(Messages.ThisRoleDoesNotExistForTheUser, HttpStatusCode.BadRequest);
             }
             
             user.Roles.Remove(userRole);

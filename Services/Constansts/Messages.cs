@@ -1,4 +1,7 @@
-﻿namespace Services.Constansts;
+﻿using Entities.Model;
+using System.Data;
+
+namespace Services.Constansts;
 
 public static class Messages
 {
@@ -24,4 +27,5 @@ public static class Messages
     public const string RoleAssignedSuccessfully = "Rol başarıyla atandı.";
     public const string RoleRemovedSuccessfully = "Rol başarıyla geri çekildi.";
     public const string UserInformationNotRetrieved = "Kullanıcı bilgisi alınamadı.";
+    public const string ThisRoleDoesNotExistForTheUser = "Bu rol kullanıcıda mevcut değil.";
 }   
