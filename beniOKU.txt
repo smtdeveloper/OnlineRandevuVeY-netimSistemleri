@@ -1,6 +1,6 @@
-=========================================
-ONLINE RANDEVU VE YÖNETİM SİSTEMİ
-=========================================
+=====================================================
+DİNÇER - ONLINE RANDEVU VE YÖNETİM SİSTEMİ 
+=====================================================
 
 Proje Kapsamında:
 -----------------
@@ -71,6 +71,17 @@ VERİTABANI YAPISI
      - `IsDelete`: Silinme durumu.
    - İlişkiler:
      - `User`: Rolün ait olduğu kullanıcı.
+
+-----------------------------------------
+Sistem Kullanıcıları
+-----------------------------------------
+
+Kullanıcı Adı : admin1  Şifre: admin1 Rol: ADMİN
+Kullanıcı Adı : admin2  Şifre: admin2 Rol: ADMİN
+
+Kullanıcı Adı : customer1  Şifre: customer1 Rol: CUSTOMER
+Kullanıcı Adı : customer2  Şifre: customer2 Rol: CUSTOMER
+Kullanıcı Adı : customer3  Şifre: customer3 Rol: CUSTOMER
 
 -----------------------------------------
 PROJENİN ÖZELLİKLERİ

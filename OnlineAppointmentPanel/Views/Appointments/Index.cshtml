@@ -6,19 +6,20 @@
 }
 
 <h1 class="text-center my-4">Randevu Listesi</h1>
-
+@if (Model.IsCustomer)
+{
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
+            Yeni Randevu Al
+        </button>
+    </div>
+}
 <div class="card">
+  
     <div class="card-body">
-        @if (Model.IsCustomer)
-        {
-            <div class="d-flex justify-content-end mb-3">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
-                    Yeni Randevu Al
-                </button>
-            </div>
-        }
+      
 
-        <table class="table table-hover">
+        <table id="appointmentTable" class="table table-hover" style="width:100%">
             <thead class="table-primary">
                 <tr>
                     @if (Model.IsAdmin)
@@ -26,9 +27,9 @@
                         <th>Kullanıcı Adı</th>
                     }
                     <th>Hizmet Adı</th>
-                    <th>Randevu Tarihi</th>
+                    <th class ="text-start">Randevu Tarihi</th>
                     <th>Durum</th>
-                    <th>İşlemler</th>
+                    <th class="text-end">İşlemler</th>
                 </tr>
             </thead>
             <tbody id="appointmentList">
@@ -42,9 +43,9 @@
                                 <td>@appointment.UserName</td>
                             }
                             <td>@appointment.ServiceName</td>
-                            <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="text-start">@appointment.AppointmentDate.ToString("yyyy-MM-dd HH:mm")</td>
                             <td class="status-cell" data-status="@appointment.Status.ToString()"></td>
-                            <td>
+                            <td class="text-end">
                                 <a href="@Url.Action("Detail", "Appointments", new { id = appointment.Id })" class="btn btn-info btn-sm">Detay</a>
                                 @if (Model.IsCustomer)
                                 {
@@ -164,13 +165,21 @@
         });
     </script>
 }
+@section Scripts { 
 
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
 
 <script>
+
+      new DataTable('#appointmentTable', {
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.1.8/i18n/tr.json',
+                },
+            });
+
     $(document).ready(function () {
         
         const statusTranslations = {
@@ -330,7 +339,7 @@
                                     <td>${response.appointment.serviceName || "Bilinmiyor"}</td>
                                     <td>${response.appointment.appointmentDate || "Tarih yok"}</td>
                                     <td class="status-cell" data-status="${response.appointment.status}">${translatedStatus}</td>
-                                    <td>
+                                        <td class="text-end" >
                                         <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
                                         <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>
                                         <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('${response.appointment.id}')">Sil</button>
@@ -430,7 +439,7 @@
                                 <td>${response.appointment.serviceName}</td>
                                 <td>${response.appointment.appointmentDate}</td>
                                 <td>${response.appointment.status}</td>
-                                <td>
+                                    <td class="text-end">
                                     <a href="/Appointments/Detail/${response.appointment.id}" class="btn btn-info btn-sm">Detay</a>
                                     <a href="javascript:void(0)" onclick="openUpdateModal('${response.appointment.id}')" class="btn btn-warning btn-sm">Güncelle</a>
                                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('${response.appointment.id}')">Sil</button>
@@ -483,3 +492,4 @@
         };
     });
 </script>
+}
