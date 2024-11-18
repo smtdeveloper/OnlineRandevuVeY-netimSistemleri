@@ -20,7 +20,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     public async Task<User?> GetByIdAsync(Guid id)
     {
         return await _context.Users
-                             .Include(u => u.Roles) // Rolleri de dahil ediyoruz
+                             .Include(u => u.Roles)
                              .FirstOrDefaultAsync(u => u.Id == id);
     }
 

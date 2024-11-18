@@ -57,7 +57,7 @@ public class AppointmentRepository : GenericRepository<Appointment>, IAppointmen
     public async Task<Appointment?> GetByAppointmentIdAsync(Guid id)
     {
         return await _context.Appointments
-            .Include(a => a.Service) // Service ilişkisinin yüklenmesi
+            .Include(a => a.Service)
             .Include(u => u.User)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
